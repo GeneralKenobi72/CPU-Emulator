@@ -42,6 +42,8 @@ public class Main {
 				runCodeFromFile();
 			else if(strings[0].equals("step") || strings[0].equals("s"))
 				nextLineFromFile();
+			else if(strings[0].equals("cat"))
+				catFile();
 			else
 				System.out.println("shell: Command doesn't exist");
 		} else if(strings.length == 2) {
@@ -87,14 +89,17 @@ public class Main {
 			while((line = br.readLine()) != null) {
 				linesFromFile.add(line);
 			}
-			int errorOnLine = scanForErrorsInFile();
-			if(errorOnLine != -1) {
-				System.out.println("Error on line" + errorOnLine + " File can't be opened");
-				return;
-			}
 			pc.setRegisterContent(pc.getRegisterContent() + 1);
 		}catch(IOException e) {
-			System.out.println("File does not exist");
+			System.out.println("shell: file does not exist");
+		}
+	}
+
+	public static void catFile() {
+		for(int i=0;i<linesFromFile.size();i++) {
+			if(i == pc.getRegisterContent()-1)
+				System.out.println(" ==> (" + (i+1) + ") " + linesFromFile.get(i));
+			else System.out.println("     (" +  (i+1) + ") " + linesFromFile.get(i));
 		}
 	}
 
@@ -120,8 +125,10 @@ public class Main {
 			regFirst = r2;
 		else if(reg1.equals("r3"))
 			regFirst = r3;
+		else if(reg1.equals("pc"))
+			System.out.println("shell: pc register can't be modified this way");
 		else {
-			System.out.println("Register " + reg1 + " does not exist");
+			System.out.println("shell: register " + reg1 + " does not exist");
 			return;
 		}
 		if(reg2.equals("r0"))
@@ -132,8 +139,10 @@ public class Main {
 			regSecond = r2;
 		else if(reg2.equals("r3"))
 			regSecond = r3;
+		else if(reg2.equals("pc"))
+				System.out.println("shell: pc register can't be used for this operation");
 		else {
-			System.out.println("Register " + reg2 + " does not exist");
+			System.out.println("shell: register " + reg2 + " does not exist");
 			return;
 		}
 		if(cmd.equals("mov"))
@@ -176,8 +185,10 @@ public class Main {
 			regFirst = r2;
 		else if(reg.equals("r3"))
 			regFirst = r3;
+		else if(reg.equals("pc"))
+			System.out.println("shell: pc register can't be modified this way");
 		else {
-			System.out.println("Register " + reg + " does not exist");
+			System.out.println("shell: register " + reg + " does not exist");
 			return;
 		}
 		if(cmd.equals("mov"))
@@ -220,8 +231,10 @@ public class Main {
 			regFirst = r2;
 		else if(reg.equals("r3"))
 			regFirst = r3;
+		else if(reg.equals("pc"))
+			System.out.println("shell: pc register can't be modified this way");
 		else {
-			System.out.println("Register " + reg + " does not exist");
+			System.out.println("shell: register " + reg + " does not exist");
 			return;
 		}
 		if(cmd.equals("mov"))
@@ -263,8 +276,10 @@ public class Main {
 			r2.bitwiseNOTRegister();
 		else if(reg.equals("r3"))
 			r3.bitwiseNOTRegister();
+		else if(reg.equals("pc"))
+			System.out.println("shell: pc register can't be modified this way");
 		else {
-			System.out.println("Register " + reg + " does not exist");
+			System.out.println("shell: register " + reg + " does not exist");
 			return;
 		}
 	}
@@ -302,8 +317,12 @@ public class Main {
 	}
 
 	public static void inputRegister(String inputRegister) {
-		if(!inputRegister.equals("r0") && !inputRegister.equals("r1") && !inputRegister.equals("r2") && !inputRegister.equals("r3")) {
-			System.out.println("Register " + inputRegister + " does not exist");
+		if(!inputRegister.equals("r0") && !inputRegister.equals("r1") && !inputRegister.equals("r2") && !inputRegister.equals("r3") && !inputRegister.equals("pc")) {
+			System.out.println("shell: register " + inputRegister + " does not exist");
+			return;
+		}
+		if(inputRegister.equals("pc")) {
+			System.out.println("shell: pc register can't be modified this way");
 			return;
 		}
 		GeneralPurposeRegister rI = new GeneralPurposeRegister();
@@ -347,8 +366,10 @@ public class Main {
 			r2.infoDump();
 		else if(outputRegister.equals("r3"))
 			r3.infoDump();
+		else if(outputRegister.equals("pc"))
+			pc.infoDump();
 		else
-			System.out.println("Register " + outputRegister + " does not exist");
+			System.out.println("shell: register " + outputRegister + " does not exist");
 	}
 
 	public static void printHelp() {
