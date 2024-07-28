@@ -16,21 +16,24 @@ public class Main {
 	public static boolean on = true;
 	public static boolean fileLoaded = false;
 	public static ArrayList<String> linesFromFile = new ArrayList<>();
-
+	public static int compareFlag = -2; // -2 = clear flag, -1 = less, 0 = equals, 1 = greater
 	
 	public static void main(String args[]) {
 		printWelcomeMessage();
 		while(on) {
-			scanInput();
+			scanInput("");
 		}
 	}
 
-	public static void scanInput() { // TODO: Catch CTRL-C interrupt
-		System.out.print(">");
-		Scanner scan = new Scanner(System.in);
-		String scanned;
-		scanned = scan.nextLine();
-		String[] strings = scanned.split(" ");
+	public static void scanInput(String command) { // TODO: Catch CTRL-C interrupt
+		String[] strings;
+		if(command.equals("")) {
+			Scanner scan = new Scanner(System.in);
+			String scanned;
+			scanned = scan.nextLine();
+			strings = scanned.split(" ");
+		} else
+			strings = command.split(" ");
 		if(strings.length == 1) {
 			if(strings[0].equals("help"))
 				printHelp();
@@ -55,6 +58,12 @@ public class Main {
 				inputRegister(strings[1]);
 			else if(strings[0].equals("not"))
 				callBitwiseNot(strings[1]);
+			else if(strings[0].equals("jmp") ||
+					strings[0].equals("je") ||
+					strings[0].equals("jne") ||
+					strings[0].equals("jge") ||
+					strings[0].equals("jl"))
+				callJump(strings[0], strings[1]);
 			else
 				System.out.println("shell: Command doesn't exist");
 		} else if(strings.length == 3) {
@@ -65,6 +74,7 @@ public class Main {
 						strings[0].equals("div") ||
 						strings[0].equals("and") ||
 						strings[0].equals("or") ||
+						strings[0].equals("cmp") ||
 						strings[0].equals("xor"))
 						&& strings[1].charAt(strings[1].length()-1) == ',')
 				call3ArgCmd(strings[0], strings[1], strings[2]);
@@ -90,6 +100,7 @@ public class Main {
 				linesFromFile.add(line);
 			}
 			pc.setRegisterContent(pc.getRegisterContent() + 1);
+			fileLoaded = true;
 		}catch(IOException e) {
 			System.out.println("shell: file does not exist");
 		}
@@ -101,6 +112,45 @@ public class Main {
 				System.out.println(" ==> (" + (i+1) + ") " + linesFromFile.get(i));
 			else System.out.println("     (" +  (i+1) + ") " + linesFromFile.get(i));
 		}
+	}
+
+	public static void callJump(String jump, String line) {
+		long lineNum;
+		if(!fileLoaded) {
+			System.out.println("shell: Invalid use of jump function, no file loaded");
+			return;
+		}
+		try {
+			lineNum = Long.parseLong(line);
+		} catch(NumberFormatException e) {
+			System.out.println("shell: invalid use of jump function");
+			return;
+		}
+		if(jump.equals("jmp"))
+			pc.jumpToInstruction(lineNum, linesFromFile.size());
+		else if(compareFlag !=-2) {
+			if(jump.equals("je")) {
+				if(compareFlag == 0)
+					pc.jumpToInstruction(lineNum, linesFromFile.size());
+			} else if(jump.equals("jne")) {
+				if(compareFlag != 0)
+					pc.jumpToInstruction(lineNum, linesFromFile.size());
+			} else if(jump.equals("jg")) {
+				if(compareFlag == 1)
+					pc.jumpToInstruction(lineNum, linesFromFile.size());
+			} else if(jump.equals("jl")) {
+				if(compareFlag == -1)
+					pc.jumpToInstruction(lineNum, linesFromFile.size());
+			} else if(jump.equals("jge")) {
+				if(compareFlag >= 0)
+					pc.jumpToInstruction(lineNum, linesFromFile.size());
+			} else if(jump.equals("jle")) {
+				if(compareFlag <= 0)
+					pc.jumpToInstruction(lineNum, linesFromFile.size());
+			}
+		}
+		else
+			System.out.println("shell: invalid use of jump function");
 	}
 
 	public static void call3ArgCmd(String cmd, String reg11, String reg2) {
@@ -161,6 +211,8 @@ public class Main {
 			regFirst.bitwiseORRegisters(regSecond);
 		else if(cmd.equals("xor"))
 			regFirst.bitwiseXORRegisters(regSecond);
+		else if(cmd.equals("cmp"))
+			compareFlag = regFirst.cmp(regSecond);
 		else {
 			System.out.println("shell: Command does not exist");
 			return;
@@ -207,6 +259,8 @@ public class Main {
 			regFirst.bitwiseORRegisters(num);
 		else if(cmd.equals("xor"))
 			regFirst.bitwiseXORRegisters(num);
+		else if(cmd.equals("cmp"))
+			compareFlag = regFirst.cmp(num);
 		else {
 			System.out.println("shell: Command does not exist");
 			return;
@@ -253,6 +307,8 @@ public class Main {
 			regFirst.bitwiseORRegisters(ch);
 		else if(cmd.equals("xor"))
 			regFirst.bitwiseXORRegisters(ch);
+		else if(cmd.equals("cmp"))
+			compareFlag = regFirst.cmp(ch);
 		else {
 			System.out.println("shell: Command does not exist");
 			return;
@@ -285,7 +341,8 @@ public class Main {
 	}
 
 	public static void nextLineFromFile() {
-		System.out.println("TODO: Load next line from file");
+		scanInput(linesFromFile.get((int)pc.getRegisterContent() - 1));
+		pc.nextInstruction(linesFromFile.size());
 	}
 
 	public static void haltCPU() {
