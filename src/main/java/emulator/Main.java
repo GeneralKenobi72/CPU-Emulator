@@ -51,6 +51,8 @@ public class Main {
 				outputRegister(strings[1]);
 			else if(strings[0].equals("in"))
 				inputRegister(strings[1]);
+			else if(strings[0].equals("not"))
+				callBitwiseNot(strings[1]);
 			else
 				System.out.println("shell: Command doesn't exist");
 		} else if(strings.length == 3) {
@@ -250,6 +252,21 @@ public class Main {
 			r2 = regFirst;
 		else
 			r3 = regFirst;
+	}
+
+	public static void callBitwiseNot(String reg) {
+		if(reg.equals("r0"))
+			r0.bitwiseNOTRegister();
+		else if(reg.equals("r1"))
+			r1.bitwiseNOTRegister();
+		else if(reg.equals("r2"))
+			r2.bitwiseNOTRegister();
+		else if(reg.equals("r3"))
+			r3.bitwiseNOTRegister();
+		else {
+			System.out.println("Register " + reg + " does not exist");
+			return;
+		}
 	}
 
 	public static void nextLineFromFile() {
