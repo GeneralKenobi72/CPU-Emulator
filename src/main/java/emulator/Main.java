@@ -487,6 +487,29 @@ public class Main {
 
 	public static void printHelp() {
 		System.out.println("TODO: Help");
+		System.out.println("General commands:");
+		System.out.println("\tpoweroff");
+		System.out.println("\thalt - halts CPU");
+		System.out.println("\tresume - resumes CPU when halted\n");
+		System.out.println("File related commands:");
+		System.out.println("\tfl - loads file from input directory. e.g. fl test.txt");
+		System.out.println("\tcat - prints all instructions from file");
+		System.out.println("\tstep(s) - executes instruction program counter points to in file");
+		System.out.println("\trun - executes whole program from file");
+		System.out.println("Jumps (can be used only in file, and not directly)");
+		System.out.println("\tjmp, je, jne, jg, jge, jl, jle - all take one parametar, line to jump to\n");
+		System.out.println("Registers commands:");
+		System.out.println("\tout r - prints data about register r. e.g. out r0");
+		System.out.println("\tin r - writes user input in register r. e.g. int r0");
+		System.out.println("\tmov r1, r2 - writes content of register r2 into register r1");
+		System.out.println("\tadd r1, r2 - adds registers r1 and r2, and stores result in r1");
+		System.out.println("\tsub r1, r2 - subtracts registers r1 and r2, and stores result in r1");
+		System.out.println("\tdiv r1, r2 - divides registers r1 and r2, and stores result in r1");
+		System.out.println("\tmul r1, r2 - multiplies registers r1 and r2, and stores result in r1");
+		System.out.println("\tand r1, r2 - bitwise and operation on registers r1 and r2, and stores result in r1");
+		System.out.println("\tor r1, r2 - bitwise or operation on registers r1 and r2, and stores result in r1");
+		System.out.println("\txor r1, r2 - bitwise xor operation on registers r1 and r2, and stores result in r1");
+		System.out.println("\tnot r - bitwise not operatio on register r\n");
 	}
 
 	public static void printWelcomeMessage() {
