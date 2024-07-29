@@ -6,10 +6,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	public static GeneralPurposeRegister r0 = new GeneralPurposeRegister("r0", 0);
-	public static GeneralPurposeRegister r1 = new GeneralPurposeRegister("r1", 0);
-	public static GeneralPurposeRegister r2 = new GeneralPurposeRegister("r2", 0);
-	public static GeneralPurposeRegister r3 = new GeneralPurposeRegister("r3", 0);
+	public static CPU cpu = new CPU();
 
 	public static ProgramCounterRegister pc = new ProgramCounterRegister("pc", 0);
 
@@ -186,13 +183,13 @@ public class Main {
 		GeneralPurposeRegister regFirst = new GeneralPurposeRegister();
 		GeneralPurposeRegister regSecond = new GeneralPurposeRegister();
 		if(reg1.equals("r0"))
-			regFirst = r0;
+			regFirst = cpu.r0;
 		else if(reg1.equals("r1"))
-			regFirst = r1;
+			regFirst = cpu.r1;
 		else if(reg1.equals("r2"))
-			regFirst = r2;
+			regFirst = cpu.r2;
 		else if(reg1.equals("r3"))
-			regFirst = r3;
+			regFirst = cpu.r3;
 		else if(reg1.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
 			errFlag = 1;
@@ -204,13 +201,13 @@ public class Main {
 			return;
 		}
 		if(reg2.equals("r0"))
-			regSecond = r0;
+			regSecond = cpu.r0;
 		else if(reg2.equals("r1"))
-			regSecond = r1;
+			regSecond = cpu.r1;
 		else if(reg2.equals("r2"))
-			regSecond = r2;
+			regSecond = cpu.r2;
 		else if(reg2.equals("r3"))
-			regSecond = r3;
+			regSecond = cpu.r3;
 		else if(reg2.equals("pc")) {
 			System.out.println("shell: pc register can't be used for this operation");
 			errFlag = 1;
@@ -245,25 +242,25 @@ public class Main {
 			return;
 		}
 		if(reg1.equals("r0"))
-			r0 = regFirst;
+			cpu.r0 = regFirst;
 		else if(reg1.equals("r1"))
-			r1 = regFirst;
+			cpu.r1 = regFirst;
 		else if(reg1.equals("r2"))
-			r2 = regFirst;
+			cpu.r2 = regFirst;
 		else
-			r3 = regFirst;
+			cpu.r3 = regFirst;
 	}
 
 	public static void call3ArgCmdSecondLong(String cmd, String reg, long num) {
 		GeneralPurposeRegister regFirst = new GeneralPurposeRegister();
 		if(reg.equals("r0"))
-			regFirst = r0;
+			regFirst = cpu.r0;
 		else if(reg.equals("r1"))
-			regFirst = r1;
+			regFirst = cpu.r1;
 		else if(reg.equals("r2"))
-			regFirst = r2;
+			regFirst = cpu.r2;
 		else if(reg.equals("r3"))
-			regFirst = r3;
+			regFirst = cpu.r3;
 		else if(reg.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
 			errFlag = 1;
@@ -298,25 +295,25 @@ public class Main {
 			return;
 		}
 		if(reg.equals("r0"))
-			r0 = regFirst;
+			cpu.r0 = regFirst;
 		else if(reg.equals("r1"))
-			r1 = regFirst;
+			cpu.r1 = regFirst;
 		else if(reg.equals("r2"))
-			r2 = regFirst;
+			cpu.r2 = regFirst;
 		else
-			r3 = regFirst;
+			cpu.r3 = regFirst;
 	}
 
 	public static void call3ArgCmdSecondChar(String cmd, String reg, char ch) {
 		GeneralPurposeRegister regFirst = new GeneralPurposeRegister();
 		if(reg.equals("r0"))
-			regFirst = r0;
+			regFirst = cpu.r0;
 		else if(reg.equals("r1"))
-			regFirst = r1;
+			regFirst = cpu.r1;
 		else if(reg.equals("r2"))
-			regFirst = r2;
+			regFirst = cpu.r2;
 		else if(reg.equals("r3"))
-			regFirst = r3;
+			regFirst = cpu.r3;
 		else if(reg.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
 			errFlag = 1;
@@ -350,24 +347,24 @@ public class Main {
 			return;
 		}
 		if(reg.equals("r0"))
-			r0 = regFirst;
+			cpu.r0 = regFirst;
 		else if(reg.equals("r1"))
-			r1 = regFirst;
+			cpu.r1 = regFirst;
 		else if(reg.equals("r2"))
-			r2 = regFirst;
+			cpu.r2 = regFirst;
 		else
-			r3 = regFirst;
+			cpu.r3 = regFirst;
 	}
 
 	public static void callBitwiseNot(String reg) {
 		if(reg.equals("r0"))
-			r0.bitwiseNOTRegister();
+			cpu.r0.bitwiseNOTRegister();
 		else if(reg.equals("r1"))
-			r1.bitwiseNOTRegister();
+			cpu.r1.bitwiseNOTRegister();
 		else if(reg.equals("r2"))
-			r2.bitwiseNOTRegister();
+			cpu.r2.bitwiseNOTRegister();
 		else if(reg.equals("r3"))
-			r3.bitwiseNOTRegister();
+			cpu.r3.bitwiseNOTRegister();
 		else if(reg.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
 			errFlag = 1;
@@ -408,10 +405,10 @@ public class Main {
 	}
 
 	public static void resetContext() { // Resets all registers, and loaded lines file.
-		r0.setRegisterContent(0);
-		r1.setRegisterContent(0);
-		r2.setRegisterContent(0);
-		r3.setRegisterContent(0);
+		cpu.r0.setRegisterContent(0);
+		cpu.r1.setRegisterContent(0);
+		cpu.r2.setRegisterContent(0);
+		cpu.r3.setRegisterContent(0);
 		pc.setRegisterContent(0);
 		linesFromFile.clear();
 		fileLoaded = false;
@@ -454,29 +451,29 @@ public class Main {
 			rI.setRegisterDataType(1);
 		}
 		if(inputRegister.equals("r0")) {
-			r0.setRegisterDataType(rI.getRegisterDataType());
-			r0.setRegisterContent(rI.getRegisterContent());
+			cpu.r0.setRegisterDataType(rI.getRegisterDataType());
+			cpu.r0.setRegisterContent(rI.getRegisterContent());
 		} else if(inputRegister.equals("r1")) {
-			r1.setRegisterDataType(rI.getRegisterDataType());
-			r1.setRegisterContent(rI.getRegisterContent());
+			cpu.r1.setRegisterDataType(rI.getRegisterDataType());
+			cpu.r1.setRegisterContent(rI.getRegisterContent());
 		} else if(inputRegister.equals("r2")) {
-			r2.setRegisterDataType(rI.getRegisterDataType());
-			r2.setRegisterContent(rI.getRegisterContent());
+			cpu.r2.setRegisterDataType(rI.getRegisterDataType());
+			cpu.r2.setRegisterContent(rI.getRegisterContent());
 		} else if(inputRegister.equals("r3")) {
-			r3.setRegisterDataType(rI.getRegisterDataType());
-			r3.setRegisterContent(rI.getRegisterContent());
+			cpu.r3.setRegisterDataType(rI.getRegisterDataType());
+			cpu.r3.setRegisterContent(rI.getRegisterContent());
 		}
 	}
 
 	public static void outputRegister(String outputRegister) {
 		if(outputRegister.equals("r0"))
-			r0.infoDump();
+			cpu.r0.infoDump();
 		else if(outputRegister.equals("r1"))
-			r1.infoDump();
+			cpu.r1.infoDump();
 		else if(outputRegister.equals("r2"))
-			r2.infoDump();
+			cpu.r2.infoDump();
 		else if(outputRegister.equals("r3"))
-			r3.infoDump();
+			cpu.r3.infoDump();
 		else if(outputRegister.equals("pc"))
 			pc.infoDump();
 		else {
