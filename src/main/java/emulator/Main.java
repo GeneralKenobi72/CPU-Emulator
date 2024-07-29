@@ -17,17 +17,20 @@ public class Main {
 	public static boolean fileLoaded = false;
 	public static ArrayList<String> linesFromFile = new ArrayList<>();
 	public static int compareFlag = -2; // -2 = clear flag, -1 = less, 0 = equals, 1 = greater
+	public static int errFlag = 0;
 	
 	public static void main(String args[]) {
 		printWelcomeMessage();
 		while(on) {
 			scanInput("");
+			errFlag = 0;
 		}
 	}
 
 	public static void scanInput(String command) { // TODO: Catch CTRL-C interrupt
 		String[] strings;
 		if(command.equals("")) {
+			System.out.print(">");
 			Scanner scan = new Scanner(System.in);
 			String scanned;
 			scanned = scan.nextLine();
@@ -61,7 +64,9 @@ public class Main {
 			else if(strings[0].equals("jmp") ||
 					strings[0].equals("je") ||
 					strings[0].equals("jne") ||
+					strings[0].equals("jg") ||
 					strings[0].equals("jge") ||
+					strings[0].equals("jle") ||
 					strings[0].equals("jl"))
 				callJump(strings[0], strings[1]);
 			else
@@ -107,6 +112,11 @@ public class Main {
 	}
 
 	public static void catFile() {
+		if(linesFromFile.isEmpty()) {
+			System.out.println("shell: file empty or not loaded");
+			errFlag = 1;
+			return;
+		}
 		for(int i=0;i<linesFromFile.size();i++) {
 			if(i == pc.getRegisterContent()-1)
 				System.out.println(" ==> (" + (i+1) + ") " + linesFromFile.get(i));
@@ -118,39 +128,47 @@ public class Main {
 		long lineNum;
 		if(!fileLoaded) {
 			System.out.println("shell: Invalid use of jump function, no file loaded");
+			errFlag = 1;
 			return;
 		}
 		try {
 			lineNum = Long.parseLong(line);
 		} catch(NumberFormatException e) {
 			System.out.println("shell: invalid use of jump function");
+			errFlag = 1;
 			return;
 		}
+		int jumpWasSuccessful = 1;
 		if(jump.equals("jmp"))
-			pc.jumpToInstruction(lineNum, linesFromFile.size());
+			jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 		else if(compareFlag !=-2) {
 			if(jump.equals("je")) {
 				if(compareFlag == 0)
-					pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 			} else if(jump.equals("jne")) {
 				if(compareFlag != 0)
-					pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 			} else if(jump.equals("jg")) {
 				if(compareFlag == 1)
-					pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 			} else if(jump.equals("jl")) {
 				if(compareFlag == -1)
-					pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 			} else if(jump.equals("jge")) {
 				if(compareFlag >= 0)
-					pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 			} else if(jump.equals("jle")) {
 				if(compareFlag <= 0)
-					pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
 			}
 		}
-		else
+		else {
 			System.out.println("shell: invalid use of jump function");
+			errFlag = 1;
+		}
+		if(jumpWasSuccessful == 1) {
+			errFlag = 1;
+		}
 	}
 
 	public static void call3ArgCmd(String cmd, String reg11, String reg2) {
@@ -175,10 +193,14 @@ public class Main {
 			regFirst = r2;
 		else if(reg1.equals("r3"))
 			regFirst = r3;
-		else if(reg1.equals("pc"))
+		else if(reg1.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
+			errFlag = 1;
+			return;
+		}
 		else {
 			System.out.println("shell: register " + reg1 + " does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(reg2.equals("r0"))
@@ -189,10 +211,14 @@ public class Main {
 			regSecond = r2;
 		else if(reg2.equals("r3"))
 			regSecond = r3;
-		else if(reg2.equals("pc"))
-				System.out.println("shell: pc register can't be used for this operation");
+		else if(reg2.equals("pc")) {
+			System.out.println("shell: pc register can't be used for this operation");
+			errFlag = 1;
+			return;
+		}
 		else {
 			System.out.println("shell: register " + reg2 + " does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(cmd.equals("mov"))
@@ -215,6 +241,7 @@ public class Main {
 			compareFlag = regFirst.cmp(regSecond);
 		else {
 			System.out.println("shell: Command does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(reg1.equals("r0"))
@@ -237,10 +264,14 @@ public class Main {
 			regFirst = r2;
 		else if(reg.equals("r3"))
 			regFirst = r3;
-		else if(reg.equals("pc"))
+		else if(reg.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
+			errFlag = 1;
+			return;
+		}
 		else {
 			System.out.println("shell: register " + reg + " does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(cmd.equals("mov"))
@@ -263,6 +294,7 @@ public class Main {
 			compareFlag = regFirst.cmp(num);
 		else {
 			System.out.println("shell: Command does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(reg.equals("r0"))
@@ -285,10 +317,14 @@ public class Main {
 			regFirst = r2;
 		else if(reg.equals("r3"))
 			regFirst = r3;
-		else if(reg.equals("pc"))
+		else if(reg.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
+			errFlag = 1;
+			return;
+		}
 		else {
 			System.out.println("shell: register " + reg + " does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(cmd.equals("mov"))
@@ -332,16 +368,29 @@ public class Main {
 			r2.bitwiseNOTRegister();
 		else if(reg.equals("r3"))
 			r3.bitwiseNOTRegister();
-		else if(reg.equals("pc"))
+		else if(reg.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
+			errFlag = 1;
+			return;
+		}
 		else {
 			System.out.println("shell: register " + reg + " does not exist");
+			errFlag = 1;
 			return;
 		}
 	}
 
 	public static void nextLineFromFile() {
+		if(!fileLoaded) {
+			System.out.println("shell: File not loaded");
+			return;
+		}
 		scanInput(linesFromFile.get((int)pc.getRegisterContent() - 1));
+		if(errFlag == 1) {
+			System.out.println("shell: Error on line " + pc.getRegisterContent() + " resetting context, exiting file");
+			resetContext();
+			return;
+		}
 		pc.nextInstruction(linesFromFile.size());
 	}
 
@@ -376,10 +425,12 @@ public class Main {
 	public static void inputRegister(String inputRegister) {
 		if(!inputRegister.equals("r0") && !inputRegister.equals("r1") && !inputRegister.equals("r2") && !inputRegister.equals("r3") && !inputRegister.equals("pc")) {
 			System.out.println("shell: register " + inputRegister + " does not exist");
+			errFlag = 1;
 			return;
 		}
 		if(inputRegister.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
+			errFlag = 1;
 			return;
 		}
 		GeneralPurposeRegister rI = new GeneralPurposeRegister();
@@ -393,8 +444,11 @@ public class Main {
 			try {
 				Double.parseDouble(in);
 				System.out.println("Only Long and Char formats supported");
-			} catch(NumberFormatException ee) {
+				errFlag = 1;
 				return;
+			} catch(NumberFormatException ee) {
+				rI.setRegisterDataType(1);
+				rI.setRegisterContent(in.charAt(0));
 			}
 			rI.setRegisterContent(in.charAt(0));
 			rI.setRegisterDataType(1);
@@ -425,8 +479,10 @@ public class Main {
 			r3.infoDump();
 		else if(outputRegister.equals("pc"))
 			pc.infoDump();
-		else
+		else {
 			System.out.println("shell: register " + outputRegister + " does not exist");
+			errFlag = 1;
+		}
 	}
 
 	public static void printHelp() {

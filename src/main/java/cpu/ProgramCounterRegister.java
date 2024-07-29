@@ -10,18 +10,20 @@ public class ProgramCounterRegister extends Register {
 	public ProgramCounterRegister() { 
 		super();	
 	}
-	public void nextInstruction(long numberOfInstructions) {
+	public int nextInstruction(long numberOfInstructions) { // return 0 if jump was successful
 		if(this.getRegisterContent() == numberOfInstructions) {
-			System.out.println("No more instructions to load");
-			return;
+			System.out.println("shell: No more instructions to load");
+			return 1;
 		}
 		else this.setRegisterContent(this.getRegisterContent() + 1);
+		return 0;
 	}
-	public void jumpToInstruction(long instructionToJumpTo, long numberOfInstructions) {
+	public int jumpToInstruction(long instructionToJumpTo, long numberOfInstructions) { // return 0 if jump was successful
 		if(instructionToJumpTo > numberOfInstructions) {
-			System.out.println("Instruction out of reach");
-			return;
+			System.out.println("shell: Instruction out of reach");
+			return 1;
 		}
-		else this.setRegisterContent(instructionToJumpTo);
+		else this.setRegisterContent(instructionToJumpTo-1);
+		return 0;
 	}
 }

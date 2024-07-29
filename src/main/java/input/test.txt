@@ -1,0 +1,6 @@
+mov r0, 11
+mov r1, 'a'
+mov r2, 'l'
+add r0, r1
+cmp r0, r1
+jg 3
