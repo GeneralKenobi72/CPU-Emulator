@@ -204,20 +204,20 @@ public class Main {
 					arg2 = 0x04;
 				}
 				else if(strings[2].replace("[", "").replace("]", "").equals("r0")) {
-					flagArg2 = 0x03;
-					arg2 = cpu.r0.getRegisterContent();
+					flagArg2 = 0x05;
+					arg2 = 0x01;
 				}
 				else if(strings[2].replace("[", "").replace("]", "").equals("r1")) {
-					flagArg2 = 0x03;
-					arg2 = cpu.r1.getRegisterContent();
+					flagArg2 = 0x05;
+					arg2 = 0x02;
 				}
 				else if(strings[2].replace("[", "").replace("]", "").equals("r2")) {
-					flagArg2 = 0x03;
-					arg2 = cpu.r2.getRegisterContent();
+					flagArg2 = 0x05;
+					arg2 = 0x03;
 				}
 				else if(strings[2].replace("[", "").replace("]", "").equals("r3")) {
-					flagArg2 = 0x03;
-					arg2 = cpu.r3.getRegisterContent();
+					flagArg2 = 0x05;
+					arg2 = 0x04;
 				}
 				else if(strings[2].equals("pc")) {
 					System.out.println("shell: register pc cannot be used this way");
@@ -274,20 +274,20 @@ public class Main {
 					arg1 = 0x04;
 				}
 				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r0")) {
-					flagArg1 = 0x03;
-					arg1 = cpu.r0.getRegisterContent();
+					flagArg1 = 0x05;
+					arg1 = 0x01;
 				}
 				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r1")) {
-					flagArg1 = 0x03;
-					arg1 = cpu.r1.getRegisterContent();
+					flagArg1 = 0x05;
+					arg1 = 0x02;
 				}
 				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r2")) {
-					flagArg1 = 0x03;
-					arg1 = cpu.r2.getRegisterContent();
+					flagArg1 = 0x05;
+					arg1 = 0x03;
 				}
 				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r3")) {
-					flagArg1 = 0x03;
-					arg1 = cpu.r3.getRegisterContent();
+					flagArg1 = 0x05;
+					arg1 = 0x04;
 				}
 				else if(s1WithoutComma.equals("pc")) {
 					System.out.println("shell: register pc cannot be used this way");
@@ -302,7 +302,6 @@ public class Main {
 						arg1 = adr;
 					} catch(NumberFormatException e) {
 						System.out.println(s);
-						System.out.println(s1WithoutComma.substring(3, s1WithoutComma.length()));
 						System.out.println("shell: Operand not supported");
 						resetContext();
 						return;
@@ -326,8 +325,6 @@ public class Main {
 					}
 				}
 			}
-			System.out.println(String.format("flags: 0x%08X + 0x%08X", flagArg1, flagArg2));
-			System.out.println(String.format("args: 0x%08X + 0x%08X", arg1, arg2));
 			memory.writeByte(address, OP_CODE);
 			address++;
 			memory.writeByte(address, flagArg1);
@@ -343,26 +340,6 @@ public class Main {
 		cpu.pc.setRegisterContent(Memory.CODE_START_ADDRESS);
 		fileLoaded = true;
 		address = Memory.CODE_START_ADDRESS;
-		// for(int i=0;i<150;i++) {
-		//  	if(i%19 == 0)
-		//  		System.out.println(" X ");
-		//  	System.out.print("Byte: " + memory.readByte(address + i) + " ");
-		//  	System.out.println("EXIT OPCODE: " + InstructionSet.EXIT_OPCODE);
-		// 	if(InstructionSet.EXIT_OPCODE == memory.readByte(address + i))
-		//  		System.out.println("ISTI BRT   ADRESA: " + (address+i) + " ADRESAMINUS: " + (address+i- Memory.CODE_START_ADDRESS));
-		// }
-		// for(int i=0;i<10;i++)
-		// 	System.out.println("Adresa: " + (address + i*19 - Memory.CODE_START_ADDRESS) + "OPKOD: " + memory.readByte(address+i*19));
-		while(address != Memory.MEMORY_SIZE) {
-			if(((address-Memory.CODE_START_ADDRESS) % 19 == 0)) {
-				if(memory.readByte(address) == InstructionSet.EXIT_OPCODE)
-					break;
-				else System.out.println();
-			}
-			System.out.print(memory.readByte(address) + " ");
-			address++;
-		}
-		System.out.println();
 	}
 
 	public static void catFile() {
@@ -731,6 +708,16 @@ public class Main {
 			instruction += "[0x" + Long.toString(arg1) + "]";
 		} else if(flagArg1 == 0x01) {
 			instruction += Long.toString(arg1);
+		} else if(flagArg1 == 0x05) {
+			if(arg1 == 0x01)
+				instruction += "[0x" + cpu.r0.getRegisterContent() + "]";
+			else if(arg1 == 0x02)
+				instruction += "[0x" + cpu.r1.getRegisterContent() + "]";
+			else if(arg1 == 0x03)
+				instruction += "[0x" + cpu.r2.getRegisterContent() + "]";
+			else if(arg1 == 0x04)
+				instruction += "[0x" + cpu.r3.getRegisterContent() + "]";
+			flagArg1 = 3;
 		} else if(flagArg1 == 0x04) {
 
 		} else {
@@ -759,8 +746,17 @@ public class Main {
 			instruction += ", [0x" + Long.toString(arg2) + "]";
 		} else if(flagArg2 == 0x02) {
 			instruction += ", \'" + (char)arg2 + "\'";
+		} else if(flagArg2 == 0x05) {
+			if(arg2 == 0x01)
+				instruction += ", [0x" + cpu.r0.getRegisterContent() + "]";
+			else if(arg2 == 0x02)
+				instruction += ", [0x" + cpu.r1.getRegisterContent() + "]";
+			else if(arg2 == 0x03)
+				instruction += ", [0x" + cpu.r2.getRegisterContent() + "]";
+			else if(arg2 == 0x04)
+				instruction += ", [0x" + cpu.r3.getRegisterContent() + "]";
+			flagArg2 = 0x03;
 		}
-		System.out.println(cpu.r3.getRegisterContent());
 		System.out.println(instruction);
 		if(OP_CODE == InstructionSet.MOV_OPCODE) {
 			if(flagArg1 == 3) {
@@ -841,7 +837,23 @@ public class Main {
 
 	public static void inputRegister(String inputRegister) {
 		if(inputRegister.substring(0, 3).equals("[0x") && inputRegister.charAt(inputRegister.length()-1) == ']') {
-			System.out.println("TODO: Input to address");
+			try {
+				long adr = Long.parseLong(inputRegister.replace("[0x", "").replace("]",""));
+				Scanner scanReg = new Scanner(System.in);
+				String in = scanReg.nextLine();
+				try {
+					Long val = Long.parseLong(in);
+					memory.writeLong(adr, val);
+				} catch(NumberFormatException e) {
+					System.out.println("shell: value can only be of value long");
+					errFlag = -1;
+					return;
+				}
+			} catch(NumberFormatException e) {
+				System.out.println("shell: argument not and address");
+				errFlag = -1;
+				return;
+			}
 			return;
 		}
 		if(!inputRegister.equals("r0") && !inputRegister.equals("r1") && !inputRegister.equals("r2") && !inputRegister.equals("r3") && !inputRegister.equals("pc")) {
@@ -901,7 +913,15 @@ public class Main {
 		else if(outputRegister.equals("pc"))
 			cpu.pc.infoDump();
 		else if(outputRegister.substring(0,3).equals("[0x") && outputRegister.charAt(outputRegister.length()-1)==']') {
-			System.out.println("TODO WRITE IN REGISTER");
+			try {
+				long adr = Long.parseLong(outputRegister.replace("[0x", "").replace("]", ""));
+				System.out.println("Value on address 0x" + adr + ": " + memory.readLong(adr));
+				return;
+			} catch(NumberFormatException e) {
+				System.out.println("shell: Address not of long type");
+				errFlag = -1;
+				return;
+			}
 		} else {
 			System.out.println("shell: register " + outputRegister + " does not exist");
 			errFlag = 1;

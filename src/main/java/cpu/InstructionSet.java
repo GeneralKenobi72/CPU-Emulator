@@ -9,6 +9,7 @@ package cpu;
  * 		0x010 - first argument is of char and takes up 8 bytes(for padding)
  * 		0x011 - first argument is an address and takes up 8 bytes(long)
  * 		0x100 - no arguments (filled with zeros, for padding)
+ * 		0x101 - address from register
  * 		
  * following bytes are determined by 2nd byte
  * next byte is 2nd flab byte, same as previous flag but describing second argument
