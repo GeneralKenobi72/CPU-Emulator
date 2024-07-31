@@ -10,8 +10,6 @@ public class Main {
 	public static CPU cpu = new CPU();
 	public static Memory memory = new Memory();
 
-	public static ProgramCounterRegister pc = new ProgramCounterRegister("pc", 0);
-
 	public static boolean on = true;
 	public static boolean fileLoaded = false;
 	public static ArrayList<String> linesFromFile = new ArrayList<>();
@@ -205,6 +203,22 @@ public class Main {
 					flagArg2 = 0x00;
 					arg2 = 0x04;
 				}
+				else if(strings[2].replace("[", "").replace("]", "").equals("r0")) {
+					flagArg2 = 0x03;
+					arg2 = cpu.r0.getRegisterContent();
+				}
+				else if(strings[2].replace("[", "").replace("]", "").equals("r1")) {
+					flagArg2 = 0x03;
+					arg2 = cpu.r1.getRegisterContent();
+				}
+				else if(strings[2].replace("[", "").replace("]", "").equals("r2")) {
+					flagArg2 = 0x03;
+					arg2 = cpu.r2.getRegisterContent();
+				}
+				else if(strings[2].replace("[", "").replace("]", "").equals("r3")) {
+					flagArg2 = 0x03;
+					arg2 = cpu.r3.getRegisterContent();
+				}
 				else if(strings[2].equals("pc")) {
 					System.out.println("shell: register pc cannot be used this way");
 					resetContext();
@@ -259,6 +273,22 @@ public class Main {
 					flagArg1 = 0x00;
 					arg1 = 0x04;
 				}
+				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r0")) {
+					flagArg1 = 0x03;
+					arg1 = cpu.r0.getRegisterContent();
+				}
+				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r1")) {
+					flagArg1 = 0x03;
+					arg1 = cpu.r1.getRegisterContent();
+				}
+				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r2")) {
+					flagArg1 = 0x03;
+					arg1 = cpu.r2.getRegisterContent();
+				}
+				else if(s1WithoutComma.replace("[", "").replace("]", "").equals("r3")) {
+					flagArg1 = 0x03;
+					arg1 = cpu.r3.getRegisterContent();
+				}
 				else if(s1WithoutComma.equals("pc")) {
 					System.out.println("shell: register pc cannot be used this way");
 					resetContext();
@@ -310,7 +340,7 @@ public class Main {
 			address+=8;
 		}
 		memory.writeByte(address, InstructionSet.EXIT_OPCODE);
-		pc.setRegisterContent(Memory.CODE_START_ADDRESS);
+		cpu.pc.setRegisterContent(Memory.CODE_START_ADDRESS);
 		fileLoaded = true;
 		address = Memory.CODE_START_ADDRESS;
 		// for(int i=0;i<150;i++) {
@@ -342,7 +372,7 @@ public class Main {
 			return;
 		}
 		for(int i=0;i<linesFromFile.size();i++) {
-			if(i == ((pc.getRegisterContent()-Memory.CODE_START_ADDRESS)/19))
+			if(i == ((cpu.pc.getRegisterContent()-Memory.CODE_START_ADDRESS)/19))
 				System.out.println(" ==> (" + (i+1) + ") " + linesFromFile.get(i));
 			else System.out.println("     (" +  (i+1) + ") " + linesFromFile.get(i));
 		}
@@ -364,26 +394,26 @@ public class Main {
 		}
 		int jumpWasSuccessful = 1;
 		if(jump.equals("jmp"))
-			jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+			jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 		else if(compareFlag !=-2) {
 			if(jump.equals("je")) {
 				if(compareFlag == 0)
-					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jne")) {
 				if(compareFlag != 0)
-					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jg")) {
 				if(compareFlag == 1)
-					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jl")) {
 				if(compareFlag == -1)
-					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jge")) {
 				if(compareFlag >= 0)
-					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jle")) {
 				if(compareFlag <= 0)
-					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			}
 		}
 		else {
@@ -610,16 +640,16 @@ public class Main {
 			return;
 		}
 		String instruction = "";
-		byte OP_CODE = memory.readByte(pc.getRegisterContent());
+		byte OP_CODE = memory.readByte(cpu.pc.getRegisterContent());
 		if(OP_CODE == InstructionSet.EXIT_OPCODE) {
 			System.out.println("shell: program reached end of execution");
 			resetContext();
 			return;
 		}
-		byte flagArg1 = memory.readByte(pc.getRegisterContent()+1);
-		long arg1 = memory.readLong(pc.getRegisterContent()+2);
-		byte flagArg2 = memory.readByte(pc.getRegisterContent()+10);
-		long arg2 = memory.readLong(pc.getRegisterContent()+11);
+		byte flagArg1 = memory.readByte(cpu.pc.getRegisterContent()+1);
+		long arg1 = memory.readLong(cpu.pc.getRegisterContent()+2);
+		byte flagArg2 = memory.readByte(cpu.pc.getRegisterContent()+10);
+		long arg2 = memory.readLong(cpu.pc.getRegisterContent()+11);
 		switch(OP_CODE) {
 			case InstructionSet.MOV_OPCODE:
 				instruction += "mov ";
@@ -730,17 +760,55 @@ public class Main {
 		} else if(flagArg2 == 0x02) {
 			instruction += ", \'" + (char)arg2 + "\'";
 		}
+		System.out.println(cpu.r3.getRegisterContent());
 		System.out.println(instruction);
 		if(OP_CODE == InstructionSet.MOV_OPCODE) {
-			if(flagArg1
+			if(flagArg1 == 3) {
+				if(flagArg2 == 0) {
+					if(arg2 == 1)
+						memory.writeLong(arg1, cpu.r0.getRegisterContent());
+					else if(arg2 == 2)
+						memory.writeLong(arg1, cpu.r1.getRegisterContent());
+					else if(arg2 == 3)
+						memory.writeLong(arg1, cpu.r2.getRegisterContent());
+					else if(arg2 == 4)
+						memory.writeLong(arg1, cpu.r3.getRegisterContent());
+				}
+				else if(flagArg2 == 1) {
+					memory.writeLong(arg1, arg2);			
+				}
+				else if(flagArg2 == 2) {
+					memory.writeLong(arg1, arg2);
+				}
+				else if(flagArg2 == 3) {
+					memory.writeLong(arg1, memory.readLong(arg2));
+				}
+				cpu.pc.nextInstruction(linesFromFile.size());
+				return;
+			}
+			else if(flagArg2 == 3) {
+				if(flagArg1 == 0) {
+					if(arg1 == 1)
+						cpu.r0.setRegisterContent(memory.readLong(arg2));
+					else if(arg1 == 2)
+						cpu.r1.setRegisterContent(memory.readLong(arg2));
+					else if(arg1 == 3)
+						cpu.r2.setRegisterContent(memory.readLong(arg2));
+					else if(arg1 == 4)
+						cpu.r3.setRegisterContent(memory.readLong(arg2));
+				}
+				cpu.pc.nextInstruction(linesFromFile.size());
+				return;
+			}
+		}
 
 		scanInput(instruction);
 		if(errFlag == 1) {
-			System.out.println("shell: Error on line " + pc.getRegisterContent() + " resetting context, exiting file");
+			System.out.println("shell: Error on line " + cpu.pc.getRegisterContent() + " resetting context, exiting file");
 		 	resetContext();
 		 	return;
 		}
-		pc.nextInstruction(linesFromFile.size());
+		cpu.pc.nextInstruction(Memory.MEMORY_SIZE);
 	}
 
 	public static void haltCPU() {
@@ -761,7 +829,7 @@ public class Main {
 		cpu.r1.setRegisterContent(0);
 		cpu.r2.setRegisterContent(0);
 		cpu.r3.setRegisterContent(0);
-		pc.setRegisterContent(0);
+		cpu.pc.setRegisterContent(0);
 		linesFromFile.clear();
 		fileLoaded = false;
 	}
@@ -831,7 +899,7 @@ public class Main {
 		else if(outputRegister.equals("r3"))
 			cpu.r3.infoDump();
 		else if(outputRegister.equals("pc"))
-			pc.infoDump();
+			cpu.pc.infoDump();
 		else if(outputRegister.substring(0,3).equals("[0x") && outputRegister.charAt(outputRegister.length()-1)==']') {
 			System.out.println("TODO WRITE IN REGISTER");
 		} else {

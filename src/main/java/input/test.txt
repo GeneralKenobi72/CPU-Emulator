@@ -1,4 +1,7 @@
-mov r3, 17
+mov r3, 4
+mov [0x04], 72
+mov r2, [r3]
+mov [0x10], 69
 mov r1, 'a'
 mov r2, 'l'
 add r0, 127

@@ -1,7 +1,7 @@
 package cpu;
 
 public class GeneralPurposeRegister extends Register {
-	private int dataType; // 0 - long, 1 - char, 2 - address
+	private int dataType; // 0 - long, 1 - char
 
 	public GeneralPurposeRegister(String registerName, long registerContent) {
 		super(registerName, registerContent);
@@ -23,7 +23,6 @@ public class GeneralPurposeRegister extends Register {
 			System.out.println("Data type: long");
 		else if(dataType == 1)
 			System.out.println("Data type: char");
-		else System.out.println("Data type: address");
 	}
 
 	public void setRegisterDataType(int dataType) {
