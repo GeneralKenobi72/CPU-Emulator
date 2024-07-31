@@ -41,8 +41,6 @@ public class Main {
 				on = false;
 			else if(strings[0].equals("halt"))
 				haltCPU();
-			else if(strings[0].equals("run"))
-				runCodeFromFile();
 			else if(strings[0].equals("step") || strings[0].equals("s"))
 				nextLineFromFile();
 			else if(strings[0].equals("cat"))
@@ -51,11 +49,11 @@ public class Main {
 				System.out.println("shell: Command doesn't exist");
 		} else if(strings.length == 2) {
 			if(strings[0].equals("fl"))
-				loadFile(strings[1]);
+				loadFileToMemory(strings[1]);
 			else if(strings[0].equals("out"))
-				outputRegister(strings[1]);
+				outputValue(strings[1]);
 			else if(strings[0].equals("in"))
-				inputRegister(strings[1]);
+				inputValue(strings[1]);
 			else if(strings[0].equals("not"))
 				callBitwiseNot(strings[1]);
 			else if(strings[0].equals("jmp") ||
@@ -86,7 +84,7 @@ public class Main {
 			System.out.println("shell: Command doesn't exist");
 	}
 
-	public static void loadFile(String fileName) {
+	public static void loadFileToMemory(String fileName) {
 		if(fileLoaded == true) {
 			System.out.println("File already loaded, loading new file will overwrite current file and registers will be reset. Are you sure you want to continue?[y/n]");
 			Scanner scanYN = new Scanner(System.in);
@@ -816,10 +814,6 @@ public class Main {
 		System.out.println("Exiting halted state");
 	}
 
-	public static void runCodeFromFile() {
-		System.out.println("TODO: Run code from file");
-	}
-
 	public static void resetContext() { // Resets all registers, and loaded lines file.
 		cpu.r0.setRegisterContent(0);
 		cpu.r1.setRegisterContent(0);
@@ -830,15 +824,10 @@ public class Main {
 		fileLoaded = false;
 	}
 
-	public static int scanForErrorsInFile() { // Returns -1 if there are no errors, else line in which error occured
-		System.out.println("TODO: Scan for errors in file");
-		return -1;
-	}
-
-	public static void inputRegister(String inputRegister) {
-		if(inputRegister.substring(0, 3).equals("[0x") && inputRegister.charAt(inputRegister.length()-1) == ']') {
+	public static void inputValue(String argument) {
+		if(argument.substring(0, 3).equals("[0x") && argument.charAt(argument.length()-1) == ']') {
 			try {
-				long adr = Long.parseLong(inputRegister.replace("[0x", "").replace("]",""));
+				long adr = Long.parseLong(argument.replace("[0x", "").replace("]",""));
 				Scanner scanReg = new Scanner(System.in);
 				String in = scanReg.nextLine();
 				try {
@@ -856,12 +845,12 @@ public class Main {
 			}
 			return;
 		}
-		if(!inputRegister.equals("r0") && !inputRegister.equals("r1") && !inputRegister.equals("r2") && !inputRegister.equals("r3") && !inputRegister.equals("pc")) {
-			System.out.println("shell: register " + inputRegister + " does not exist");
+		if(!argument.equals("r0") && !argument.equals("r1") && !argument.equals("r2") && !argument.equals("r3") && !argument.equals("pc")) {
+			System.out.println("shell: register " + argument + " does not exist");
 			errFlag = 1;
 			return;
 		}
-		if(inputRegister.equals("pc")) {
+		if(argument.equals("pc")) {
 			System.out.println("shell: pc register can't be modified this way");
 			errFlag = 1;
 			return;
@@ -886,35 +875,35 @@ public class Main {
 			rI.setRegisterContent(in.charAt(0));
 			rI.setRegisterDataType(1);
 		}
-		if(inputRegister.equals("r0")) {
+		if(argument.equals("r0")) {
 			cpu.r0.setRegisterDataType(rI.getRegisterDataType());
 			cpu.r0.setRegisterContent(rI.getRegisterContent());
-		} else if(inputRegister.equals("r1")) {
+		} else if(argument.equals("r1")) {
 			cpu.r1.setRegisterDataType(rI.getRegisterDataType());
 			cpu.r1.setRegisterContent(rI.getRegisterContent());
-		} else if(inputRegister.equals("r2")) {
+		} else if(argument.equals("r2")) {
 			cpu.r2.setRegisterDataType(rI.getRegisterDataType());
 			cpu.r2.setRegisterContent(rI.getRegisterContent());
-		} else if(inputRegister.equals("r3")) {
+		} else if(argument.equals("r3")) {
 			cpu.r3.setRegisterDataType(rI.getRegisterDataType());
 			cpu.r3.setRegisterContent(rI.getRegisterContent());
 		}
 	}
 
-	public static void outputRegister(String outputRegister) {
-		if(outputRegister.equals("r0"))
+	public static void outputValue(String argument) {
+		if(argument.equals("r0"))
 			cpu.r0.infoDump();
-		else if(outputRegister.equals("r1"))
+		else if(argument.equals("r1"))
 			cpu.r1.infoDump();
-		else if(outputRegister.equals("r2"))
+		else if(argument.equals("r2"))
 			cpu.r2.infoDump();
-		else if(outputRegister.equals("r3"))
+		else if(argument.equals("r3"))
 			cpu.r3.infoDump();
-		else if(outputRegister.equals("pc"))
+		else if(argument.equals("pc"))
 			cpu.pc.infoDump();
-		else if(outputRegister.substring(0,3).equals("[0x") && outputRegister.charAt(outputRegister.length()-1)==']') {
+		else if(argument.substring(0,3).equals("[0x") && argument.charAt(argument.length()-1)==']') {
 			try {
-				long adr = Long.parseLong(outputRegister.replace("[0x", "").replace("]", ""));
+				long adr = Long.parseLong(argument.replace("[0x", "").replace("]", ""));
 				System.out.println("Value on address 0x" + adr + ": " + memory.readLong(adr));
 				return;
 			} catch(NumberFormatException e) {
@@ -923,7 +912,7 @@ public class Main {
 				return;
 			}
 		} else {
-			System.out.println("shell: register " + outputRegister + " does not exist");
+			System.out.println("shell: register " + argument + " does not exist");
 			errFlag = 1;
 		}
 	}
@@ -938,13 +927,15 @@ public class Main {
 		System.out.println("\tfl - loads file from input directory. e.g. fl test.txt");
 		System.out.println("\tcat - prints all instructions from file");
 		System.out.println("\tstep(s) - executes instruction program counter points to in file");
-		System.out.println("\trun - executes whole program from file");
 		System.out.println("Jumps (can be used only in file, and not directly)");
 		System.out.println("\tjmp, je, jne, jg, jge, jl, jle - all take one parametar, line to jump to\n");
 		System.out.println("Registers commands:");
 		System.out.println("\tout r - prints data about register r. e.g. out r0");
+		System.out.println("\t\tor out [0x1000] to print data from address");
 		System.out.println("\tin r - writes user input in register r. e.g. int r0");
+		System.out.println("\t\tor in [0x1000] to input data in address");
 		System.out.println("\tmov r1, r2 - writes content of register r2 into register r1");
+		System.out.println("\t\tmov can also use addresses, e.g. mov [0x1000], [r1]");
 		System.out.println("\tadd r1, r2 - adds registers r1 and r2, and stores result in r1");
 		System.out.println("\tsub r1, r2 - subtracts registers r1 and r2, and stores result in r1");
 		System.out.println("\tdiv r1, r2 - divides registers r1 and r2, and stores result in r1");
