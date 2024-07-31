@@ -1,12 +1,14 @@
 package emulator;
 
 import cpu.*;
+import memory.*;
 import java.util.Scanner;
 import java.io.*;
 import java.util.*;
 
 public class Main {
 	public static CPU cpu = new CPU();
+	public static Memory memory = new Memory();
 
 	public static ProgramCounterRegister pc = new ProgramCounterRegister("pc", 0);
 
@@ -101,11 +103,236 @@ public class Main {
 			while((line = br.readLine()) != null) {
 				linesFromFile.add(line);
 			}
-			pc.setRegisterContent(pc.getRegisterContent() + 1);
-			fileLoaded = true;
 		}catch(IOException e) {
 			System.out.println("shell: file does not exist");
 		}
+
+		long address = Memory.CODE_START_ADDRESS;
+		for(String s : linesFromFile) {
+			byte OP_CODE = 0x00;
+			byte flagArg1 = 0x04, flagArg2 = 0x04;
+			long arg1 = 0, arg2 = 0;
+			if(s.isBlank() || s.isEmpty())
+				continue;
+			String[] strings = s.split(" ");
+			if(strings.length > 3) {
+				System.out.println("shell: too many arguments");
+				resetContext();
+				return;
+			}
+			switch(strings[0]) {
+				case "mov":
+					OP_CODE = InstructionSet.MOV_OPCODE;
+					break;
+				case "add":
+					OP_CODE = InstructionSet.ADD_OPCODE;
+					break;
+				case "sub":
+					OP_CODE = InstructionSet.SUB_OPCODE;
+					break;
+				case "mul":
+					OP_CODE = InstructionSet.MUL_OPCODE;
+					break;
+				case "div":
+					OP_CODE = InstructionSet.DIV_OPCODE;
+					break;
+				case "and":
+					OP_CODE = InstructionSet.AND_OPCODE;
+					break;
+				case "or":
+					OP_CODE = InstructionSet.OR_OPCODE;
+					break;
+				case "xor":
+					OP_CODE = InstructionSet.XOR_OPCODE;
+					break;
+				case "not":
+					OP_CODE = InstructionSet.NOT_OPCODE;
+					break;
+				case "jmp":
+					OP_CODE = InstructionSet.JMP_OPCODE;
+					break;
+				case "je":
+					OP_CODE = InstructionSet.JE_OPCODE;
+					break;
+				case "jne":
+					OP_CODE = InstructionSet.JNE_OPCODE;
+					break;
+				case "jg":
+					OP_CODE = InstructionSet.JG_OPCODE;
+					break;
+				case "jge":
+					OP_CODE = InstructionSet.JGE_OPCODE;
+					break;
+				case "jl":
+					OP_CODE = InstructionSet.JL_OPCODE;
+					break;
+				case "jle":
+					OP_CODE = InstructionSet.JLE_OPCODE;
+					break;
+				case "cmp":
+					OP_CODE = InstructionSet.CMP_OPCODE;
+					break;
+				case "halt":
+					OP_CODE = InstructionSet.HALT_OPCODE;
+					break;
+				case "in":
+					OP_CODE = InstructionSet.IN_OPCODE;
+					break;
+				case "out":
+					OP_CODE = InstructionSet.OUT_OPCODE;
+					break;
+				default:
+					System.out.println("shell: Command does not exist, resetting context");
+					resetContext();
+					return;
+			}
+			if(OP_CODE == 0x00)
+				return;
+			if(strings.length == 3) {
+				if(strings[2].equals("r0")) {
+					flagArg2 = 0x00;
+					arg2 = 0x01;
+				}
+				else if(strings[2].equals("r1")) {
+					flagArg2 = 0x00;
+					arg2 = 0x02;
+				}
+				else if(strings[2].equals("r2")) {
+					flagArg2 = 0x00;
+					arg2 = 0x03;
+				}
+				else if(strings[2].equals("r3")) {
+					flagArg2 = 0x00;
+					arg2 = 0x04;
+				}
+				else if(strings[2].equals("pc")) {
+					System.out.println("shell: register pc cannot be used this way");
+					resetContext();
+					return;
+				}
+				else if(strings[2].length() >= 5 && strings[2].substring(0, 3).equals("[0x") && strings[2].charAt(strings[2].length() - 1) == ']') {
+					flagArg2 = 0x03;
+					long adr;
+					try {
+						adr = Long.parseLong(strings[2].substring(3, strings[2].length()-1));
+						arg2 = adr;
+					} catch(NumberFormatException e) {
+						System.out.println(s);
+						System.out.println("shell: Operand not supported");
+						resetContext();
+						return;
+					}
+				}
+				else if(strings[2].charAt(0) == '\'' && strings[2].charAt(2) == '\'') {
+					flagArg2 = 0x02;
+					arg2 = strings[2].charAt(1);
+				}
+				else {
+					long val;
+					try {
+						val = Long.parseLong(strings[2]);
+						flagArg2 = 0x01;
+						arg2 = val;
+					} catch(NumberFormatException e) {
+						System.out.println("shell: Operand not supported");
+						resetContext();
+						return;
+					}
+				}
+			} else
+				flagArg2 = 4;
+			if(strings.length > 1) {
+				String s1WithoutComma = strings[1].replace(",", "");
+				if(s1WithoutComma.equals("r0")) {
+					flagArg1 = 0x00;
+					arg1 = 0x01;
+				}
+				else if(s1WithoutComma.equals("r1")) {
+					flagArg1 = 0x00;
+					arg1 = 0x02;
+				}
+				else if(s1WithoutComma.equals("r2")) {
+					flagArg1 = 0x00;
+					arg1 = 0x03;
+				}
+				else if(s1WithoutComma.equals("r3")) {
+					flagArg1 = 0x00;
+					arg1 = 0x04;
+				}
+				else if(s1WithoutComma.equals("pc")) {
+					System.out.println("shell: register pc cannot be used this way");
+					resetContext();
+					return;
+				}
+				else if(s1WithoutComma.length() >= 5 && s1WithoutComma.substring(0, 3).equals("[0x") && s1WithoutComma.charAt(s1WithoutComma.length()-1) == ']') {
+					flagArg1 = 0x03;
+					long adr;
+					try {
+						adr = Long.parseLong(s1WithoutComma.substring(3, s1WithoutComma.length()-1));
+						arg1 = adr;
+					} catch(NumberFormatException e) {
+						System.out.println(s);
+						System.out.println(s1WithoutComma.substring(3, s1WithoutComma.length()));
+						System.out.println("shell: Operand not supported");
+						resetContext();
+						return;
+					}
+				}
+				else if(s1WithoutComma.charAt(0) == '\'' && s1WithoutComma.charAt(2) == '\'') {
+					flagArg1 = 0x02;
+					arg1 = s1WithoutComma.charAt(1);
+				}
+				else {
+					long val;
+					try {
+						val = Long.parseLong(s1WithoutComma);
+						flagArg1 = 0x01;
+						arg1 = val;
+					} catch(NumberFormatException e) {
+						System.out.println(s);
+						System.out.println("shell: Operand not supported");
+						resetContext();
+						return;
+					}
+				}
+			}
+			System.out.println(String.format("flags: 0x%08X + 0x%08X", flagArg1, flagArg2));
+			System.out.println(String.format("args: 0x%08X + 0x%08X", arg1, arg2));
+			memory.writeByte(address, OP_CODE);
+			address++;
+			memory.writeByte(address, flagArg1);
+			address++;
+			memory.writeLong(address, arg1);
+			address+=8;
+			memory.writeByte(address, flagArg2);
+			address++;
+			memory.writeLong(address, arg2);
+			address+=8;
+		}
+		memory.writeByte(address, InstructionSet.EXIT_OPCODE);
+		pc.setRegisterContent(Memory.CODE_START_ADDRESS);
+		fileLoaded = true;
+		address = Memory.CODE_START_ADDRESS;
+		// for(int i=0;i<150;i++) {
+		//  	if(i%19 == 0)
+		//  		System.out.println(" X ");
+		//  	System.out.print("Byte: " + memory.readByte(address + i) + " ");
+		//  	System.out.println("EXIT OPCODE: " + InstructionSet.EXIT_OPCODE);
+		// 	if(InstructionSet.EXIT_OPCODE == memory.readByte(address + i))
+		//  		System.out.println("ISTI BRT   ADRESA: " + (address+i) + " ADRESAMINUS: " + (address+i- Memory.CODE_START_ADDRESS));
+		// }
+		// for(int i=0;i<10;i++)
+		// 	System.out.println("Adresa: " + (address + i*19 - Memory.CODE_START_ADDRESS) + "OPKOD: " + memory.readByte(address+i*19));
+		while(address != Memory.MEMORY_SIZE) {
+			if(((address-Memory.CODE_START_ADDRESS) % 19 == 0)) {
+				if(memory.readByte(address) == InstructionSet.EXIT_OPCODE)
+					break;
+				else System.out.println();
+			}
+			System.out.print(memory.readByte(address) + " ");
+			address++;
+		}
+		System.out.println();
 	}
 
 	public static void catFile() {
@@ -115,7 +342,7 @@ public class Main {
 			return;
 		}
 		for(int i=0;i<linesFromFile.size();i++) {
-			if(i == pc.getRegisterContent()-1)
+			if(i == ((pc.getRegisterContent()-Memory.CODE_START_ADDRESS)/19))
 				System.out.println(" ==> (" + (i+1) + ") " + linesFromFile.get(i));
 			else System.out.println("     (" +  (i+1) + ") " + linesFromFile.get(i));
 		}
@@ -137,26 +364,26 @@ public class Main {
 		}
 		int jumpWasSuccessful = 1;
 		if(jump.equals("jmp"))
-			jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+			jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 		else if(compareFlag !=-2) {
 			if(jump.equals("je")) {
 				if(compareFlag == 0)
-					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jne")) {
 				if(compareFlag != 0)
-					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jg")) {
 				if(compareFlag == 1)
-					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jl")) {
 				if(compareFlag == -1)
-					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jge")) {
 				if(compareFlag >= 0)
-					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			} else if(jump.equals("jle")) {
 				if(compareFlag <= 0)
-					jumpWasSuccessful = pc.jumpToInstruction(lineNum, linesFromFile.size());
+					jumpWasSuccessful = pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
 			}
 		}
 		else {
@@ -382,11 +609,136 @@ public class Main {
 			System.out.println("shell: File not loaded");
 			return;
 		}
-		scanInput(linesFromFile.get((int)pc.getRegisterContent() - 1));
-		if(errFlag == 1) {
-			System.out.println("shell: Error on line " + pc.getRegisterContent() + " resetting context, exiting file");
+		String instruction = "";
+		byte OP_CODE = memory.readByte(pc.getRegisterContent());
+		if(OP_CODE == InstructionSet.EXIT_OPCODE) {
+			System.out.println("shell: program reached end of execution");
 			resetContext();
 			return;
+		}
+		byte flagArg1 = memory.readByte(pc.getRegisterContent()+1);
+		long arg1 = memory.readLong(pc.getRegisterContent()+2);
+		byte flagArg2 = memory.readByte(pc.getRegisterContent()+10);
+		long arg2 = memory.readLong(pc.getRegisterContent()+11);
+		switch(OP_CODE) {
+			case InstructionSet.MOV_OPCODE:
+				instruction += "mov ";
+				break;
+			case InstructionSet.ADD_OPCODE:
+				instruction += "add ";
+				break;
+			case InstructionSet.SUB_OPCODE:
+				instruction += "sub ";
+				break;
+			case InstructionSet.MUL_OPCODE:
+				instruction += "mul ";
+				break;
+			case InstructionSet.DIV_OPCODE:
+				instruction += "div ";
+				break;
+			case InstructionSet.AND_OPCODE:
+				instruction += "and ";
+				break;
+			case InstructionSet.OR_OPCODE:
+				instruction += "or ";
+				break;
+			case InstructionSet.XOR_OPCODE:
+				instruction += "xor ";
+				break;
+			case InstructionSet.NOT_OPCODE:
+				instruction += "not ";
+				break;
+			case InstructionSet.IN_OPCODE:
+				instruction += "in ";
+				break;
+			case InstructionSet.OUT_OPCODE:
+				instruction += "out ";
+				break;
+			case InstructionSet.JMP_OPCODE:
+				instruction += "jmp ";
+				break;
+			case InstructionSet.JE_OPCODE:
+				instruction += "je ";
+				break;
+			case InstructionSet.JNE_OPCODE:
+				instruction += "jne ";
+				break;
+			case InstructionSet.JG_OPCODE:
+				instruction += "jg ";
+				break;
+			case InstructionSet.JGE_OPCODE:
+				instruction += "jge ";
+				break;
+			case InstructionSet.JL_OPCODE:
+				instruction += "jl ";
+				break;
+			case InstructionSet.JLE_OPCODE:
+				instruction += "jle ";
+				break;
+			case InstructionSet.CMP_OPCODE:
+				instruction += "cmp ";
+				break;
+			case InstructionSet.HALT_OPCODE:
+				instruction += "halt ";
+				break;
+		}
+		if(flagArg1 == 0x00) {
+			switch((int)arg1) {
+				case 1:
+					instruction += "r0";
+					break;
+				case 2:
+					instruction += "r1";
+					break;
+				case 3:
+					instruction += "r2";
+					break;
+				case 4:
+					instruction += "r3";
+					break;
+			}
+		} else if(flagArg1 == 0x03) {
+			instruction += "[0x" + Long.toString(arg1) + "]";
+		} else if(flagArg1 == 0x01) {
+			instruction += Long.toString(arg1);
+		} else if(flagArg1 == 0x04) {
+
+		} else {
+			System.out.println("shell: invalid use of operands");
+			resetContext();
+			return;
+		}
+		if(flagArg2 == 0x00) {
+			switch((int)arg2) {
+				case 1:
+					instruction += ", r0";
+					break;
+				case 2:
+					instruction += ", r1";
+					break;
+				case 3:
+					instruction += ", r2";
+					break;
+				case 4:
+					instruction += ", r3";
+					break;
+			}
+		} else if(flagArg2 == 0x01) {
+			instruction += ", " + Long.toString(arg2);
+		} else if(flagArg2 == 0x03) {
+			instruction += ", [0x" + Long.toString(arg2) + "]";
+		} else if(flagArg2 == 0x02) {
+			instruction += ", \'" + (char)arg2 + "\'";
+		}
+		System.out.println(instruction);
+		if(OP_CODE == InstructionSet.MOV_OPCODE) {
+			if(flagArg1
+
+		scanInput(instruction);
+		if(errFlag == 1) {
+			System.out.println("shell: Error on line " + pc.getRegisterContent() + " resetting context, exiting file");
+		 	resetContext();
+		 	return;
 		}
 		pc.nextInstruction(linesFromFile.size());
 	}
@@ -420,6 +772,10 @@ public class Main {
 	}
 
 	public static void inputRegister(String inputRegister) {
+		if(inputRegister.substring(0, 3).equals("[0x") && inputRegister.charAt(inputRegister.length()-1) == ']') {
+			System.out.println("TODO: Input to address");
+			return;
+		}
 		if(!inputRegister.equals("r0") && !inputRegister.equals("r1") && !inputRegister.equals("r2") && !inputRegister.equals("r3") && !inputRegister.equals("pc")) {
 			System.out.println("shell: register " + inputRegister + " does not exist");
 			errFlag = 1;
@@ -476,7 +832,9 @@ public class Main {
 			cpu.r3.infoDump();
 		else if(outputRegister.equals("pc"))
 			pc.infoDump();
-		else {
+		else if(outputRegister.substring(0,3).equals("[0x") && outputRegister.charAt(outputRegister.length()-1)==']') {
+			System.out.println("TODO WRITE IN REGISTER");
+		} else {
 			System.out.println("shell: register " + outputRegister + " does not exist");
 			errFlag = 1;
 		}

@@ -1,6 +1,9 @@
-mov r0, 11
+mov r3, 17
 mov r1, 'a'
 mov r2, 'l'
-add r0, r1
-cmp r0, r1
-jg 3
+add r0, 127
+not r1
+out r1
+in [0x1000]
+mov r1, [0x10]
+mov [0x11], r2

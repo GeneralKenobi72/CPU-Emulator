@@ -15,7 +15,7 @@ public class ProgramCounterRegister extends Register {
 			System.out.println("shell: No more instructions to load");
 			return 1;
 		}
-		else this.setRegisterContent(this.getRegisterContent() + 1);
+		else this.setRegisterContent(this.getRegisterContent() + 19);
 		return 0;
 	}
 	public int jumpToInstruction(long instructionToJumpTo, long numberOfInstructions) { // return 0 if jump was successful
@@ -23,7 +23,7 @@ public class ProgramCounterRegister extends Register {
 			System.out.println("shell: Instruction out of reach");
 			return 1;
 		}
-		else this.setRegisterContent(instructionToJumpTo-1);
+		else this.setRegisterContent(instructionToJumpTo);
 		return 0;
 	}
 }
