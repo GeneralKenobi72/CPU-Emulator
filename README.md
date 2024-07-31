@@ -43,3 +43,11 @@ The instruction set of the emulator includes:
     Processor Control:
         🔹 HALT (Stop Processor)
         🔹 RESUME (Resume Processor)
+
+### Example of usage
+
+You can write text file that utilizes commands described above and save it to src/java/main/input directory. There are 2 example files already. You can than load them in application using file load command:
+```
+fl file_name.txt
+```
+Using help command, you can see other useful commands.
