@@ -45,6 +45,8 @@ public class Main {
 				nextLineFromFile();
 			else if(strings[0].equals("cat"))
 				catFile();
+			else if(strings[0].equals("exit"))
+				resetContext();
 			else
 				System.out.println("shell: Command doesn't exist");
 		} else if(strings.length == 2) {
@@ -176,6 +178,9 @@ public class Main {
 					break;
 				case "out":
 					OP_CODE = InstructionSet.OUT_OPCODE;
+					break;
+				case "exit":
+					OP_CODE = InstructionSet.EXIT_OPCODE;
 					break;
 				default:
 					System.out.println("shell: Command does not exist, resetting context");
@@ -901,6 +906,14 @@ public class Main {
 			cpu.r3.infoDump();
 		else if(argument.equals("pc"))
 			cpu.pc.infoDump();
+		else if(argument.replace("[", "").replace("]", "").equals("r0"))
+			System.out.println("Value on address 0x" + cpu.r0.getRegisterContent() + ": " + memory.readLong(cpu.r0.getRegisterContent()));
+		else if(argument.replace("[", "").replace("[", "").equals("r1"))
+			System.out.println("Value on address 0x" + cpu.r1.getRegisterContent() + ": " + memory.readLong(cpu.r1.getRegisterContent()));
+		else if(argument.replace("[", "").replace("[", "").equals("r2"))
+			System.out.println("Value on address 0x" + cpu.r2.getRegisterContent() + ": " + memory.readLong(cpu.r2.getRegisterContent()));
+		else if(argument.replace("[", "").replace("[", "").equals("r3"))
+			System.out.println("Value on address 0x" + cpu.r3.getRegisterContent() + ": " + memory.readLong(cpu.r3.getRegisterContent()));
 		else if(argument.substring(0,3).equals("[0x") && argument.charAt(argument.length()-1)==']') {
 			try {
 				long adr = Long.parseLong(argument.replace("[0x", "").replace("]", ""));

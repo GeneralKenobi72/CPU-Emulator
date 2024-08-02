@@ -1,0 +1,13 @@
+mov r1, 10
+mov r2, 15
+add r1, r2
+mul r1, r1
+div r1, r1
+mov [0x00], r1
+mov [0x08], r2
+mov r3, [0x08]
+cmp r3, r2
+je 12
+exit
+mov [r0], 3
+exit
