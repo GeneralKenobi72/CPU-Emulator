@@ -47,6 +47,8 @@ public class Main {
 				catFile();
 			else if(strings[0].equals("exit"))
 				resetContext();
+			else if(strings[0].equals("run"))
+				runEntireProgram();
 			else
 				System.out.println("shell: Command doesn't exist");
 		} else if(strings.length == 2) {
@@ -614,6 +616,16 @@ public class Main {
 		}
 	}
 
+	public static void runEntireProgram() {
+		if(!fileLoaded) {
+			System.out.println("shell: File not loaded");
+			return;
+		}
+
+		while(fileLoaded == true)
+			nextLineFromFile();
+	}
+
 	public static void nextLineFromFile() {
 		if(!fileLoaded) {
 			System.out.println("shell: File not loaded");
@@ -750,14 +762,22 @@ public class Main {
 		} else if(flagArg2 == 0x02) {
 			instruction += ", \'" + (char)arg2 + "\'";
 		} else if(flagArg2 == 0x05) {
-			if(arg2 == 0x01)
+			if(arg2 == 0x01) {
 				instruction += ", [0x" + cpu.r0.getRegisterContent() + "]";
-			else if(arg2 == 0x02)
+				arg2 = cpu.r0.getRegisterContent();
+			}
+			else if(arg2 == 0x02) {
 				instruction += ", [0x" + cpu.r1.getRegisterContent() + "]";
-			else if(arg2 == 0x03)
+				arg2 = cpu.r1.getRegisterContent();
+			}
+			else if(arg2 == 0x03) {
 				instruction += ", [0x" + cpu.r2.getRegisterContent() + "]";
-			else if(arg2 == 0x04)
+				arg2 = cpu.r2.getRegisterContent();
+			}
+			else if(arg2 == 0x04) {
 				instruction += ", [0x" + cpu.r3.getRegisterContent() + "]";
+				arg2 = cpu.r3.getRegisterContent();
+			}
 			flagArg2 = 0x03;
 		}
 		System.out.println(instruction);
