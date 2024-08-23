@@ -4,8 +4,9 @@ add r1, r2
 cmp r1, r2
 jg 7
 exit
-mov [0x10], 72
+mov [0xf0], 72
 mov r0, 10
 mov r1, [r0]
 mov [0x00], [0x10]
+mov [0x1f], 11
 exit

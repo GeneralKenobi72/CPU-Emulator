@@ -2,6 +2,7 @@ package emulator;
 
 import cpu.*;
 import memory.*;
+import java.math.BigInteger;
 import java.util.Scanner;
 import java.io.*;
 import java.util.*;
@@ -233,7 +234,8 @@ public class Main {
 					flagArg2 = 0x03;
 					long adr;
 					try {
-						adr = Long.parseLong(strings[2].substring(3, strings[2].length()-1));
+						adr = Long.decode(strings[2].replace("[", "").replace("]",""));
+						System.out.println(adr);
 						arg2 = adr;
 					} catch(NumberFormatException e) {
 						System.out.println(s);
@@ -303,7 +305,7 @@ public class Main {
 					flagArg1 = 0x03;
 					long adr;
 					try {
-						adr = Long.parseLong(s1WithoutComma.substring(3, s1WithoutComma.length()-1));
+						adr = Long.decode(s1WithoutComma.replace("[", "").replace("]",""));
 						arg1 = adr;
 					} catch(NumberFormatException e) {
 						System.out.println(s);
@@ -960,6 +962,7 @@ public class Main {
 		System.out.println("\tfl - loads file from input directory. e.g. fl test.txt");
 		System.out.println("\tcat - prints all instructions from file");
 		System.out.println("\tstep(s) - executes instruction program counter points to in file");
+		System.out.println("\trun - runs entire user program from file");
 		System.out.println("Jumps (can be used only in file, and not directly)");
 		System.out.println("\tjmp, je, jne, jg, jge, jl, jle - all take one parametar, line to jump to\n");
 		System.out.println("Registers commands:");
