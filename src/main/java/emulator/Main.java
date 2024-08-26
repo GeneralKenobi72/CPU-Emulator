@@ -11,6 +11,7 @@ public class Main {
 	public static Memory memory = new Memory();
 	public static PageTable pageTable = new PageTable();
 	public static MMU mmu = new MMU(memory, pageTable);
+	public static long usedMemory = 0;
 
 	public static boolean on = true;
 	public static boolean fileLoaded = false;
@@ -109,7 +110,7 @@ public class Main {
 			System.out.println("shell: file does not exist");
 		}
 
-		long address = Memory.CODE_START_ADDRESS;
+		long address = 0;
 		for(String s : linesFromFile) {
 			byte OP_CODE = 0x00;
 			byte flagArg1 = 0x04, flagArg2 = 0x04;
@@ -333,20 +334,21 @@ public class Main {
 					}
 				}
 			}
-			memory.writeByte(address, OP_CODE);
+			mmu.writeByte(address, OP_CODE);
 			address++;
-			memory.writeByte(address, flagArg1);
+			mmu.writeByte(address, flagArg1);
 			address++;
-			memory.writeLong(address, arg1);
+			mmu.writeLong(address, arg1);
 			address+=8;
-			memory.writeByte(address, flagArg2);
+			mmu.writeByte(address, flagArg2);
 			address++;
-			memory.writeLong(address, arg2);
+			mmu.writeLong(address, arg2);
 			address+=8;
 		}
-		memory.writeByte(address, InstructionSet.EXIT_OPCODE);
+		mmu.writeByte(address, InstructionSet.EXIT_OPCODE);
 		cpu.pc.setRegisterContent(Memory.CODE_START_ADDRESS);
 		fileLoaded = true;
+		usedMemory = address;
 		address = Memory.CODE_START_ADDRESS;
 	}
 
@@ -635,16 +637,16 @@ public class Main {
 			return;
 		}
 		String instruction = "";
-		byte OP_CODE = memory.readByte(cpu.pc.getRegisterContent());
+		byte OP_CODE = mmu.readByte(cpu.pc.getRegisterContent());
 		if(OP_CODE == InstructionSet.EXIT_OPCODE) {
 			System.out.println("shell: program reached end of execution");
 			resetContext();
 			return;
 		}
-		byte flagArg1 = memory.readByte(cpu.pc.getRegisterContent()+1);
-		long arg1 = memory.readLong(cpu.pc.getRegisterContent()+2);
-		byte flagArg2 = memory.readByte(cpu.pc.getRegisterContent()+10);
-		long arg2 = memory.readLong(cpu.pc.getRegisterContent()+11);
+		byte flagArg1 = mmu.readByte(cpu.pc.getRegisterContent()+1);
+		long arg1 = mmu.readLong(cpu.pc.getRegisterContent()+2);
+		byte flagArg2 = mmu.readByte(cpu.pc.getRegisterContent()+10);
+		long arg2 = mmu.readLong(cpu.pc.getRegisterContent()+11);
 		switch(OP_CODE) {
 			case InstructionSet.MOV_OPCODE:
 				instruction += "mov ";
@@ -783,27 +785,27 @@ public class Main {
 			}
 			flagArg2 = 0x03;
 		}
-		System.out.println(instruction);
+		//System.out.println(instruction);
 		if(OP_CODE == InstructionSet.MOV_OPCODE) {
 			if(flagArg1 == 3) {
 				if(flagArg2 == 0) {
 					if(arg2 == 1)
-						memory.writeLong(arg1, cpu.r0.getRegisterContent());
+						mmu.writeLong(arg1, cpu.r0.getRegisterContent());
 					else if(arg2 == 2)
-						memory.writeLong(arg1, cpu.r1.getRegisterContent());
+						mmu.writeLong(arg1, cpu.r1.getRegisterContent());
 					else if(arg2 == 3)
-						memory.writeLong(arg1, cpu.r2.getRegisterContent());
+						mmu.writeLong(arg1, cpu.r2.getRegisterContent());
 					else if(arg2 == 4)
-						memory.writeLong(arg1, cpu.r3.getRegisterContent());
+						mmu.writeLong(arg1, cpu.r3.getRegisterContent());
 				}
 				else if(flagArg2 == 1) {
-					memory.writeLong(arg1, arg2);			
+					mmu.writeLong(arg1, arg2);			
 				}
 				else if(flagArg2 == 2) {
-					memory.writeLong(arg1, arg2);
+					mmu.writeLong(arg1, arg2);
 				}
 				else if(flagArg2 == 3) {
-					memory.writeLong(arg1, memory.readLong(arg2));
+					mmu.writeLong(arg1, mmu.readLong(arg2));
 				}
 				cpu.pc.nextInstruction(linesFromFile.size());
 				return;
@@ -811,13 +813,13 @@ public class Main {
 			else if(flagArg2 == 3) {
 				if(flagArg1 == 0) {
 					if(arg1 == 1)
-						cpu.r0.setRegisterContent(memory.readLong(arg2));
+						cpu.r0.setRegisterContent(mmu.readLong(arg2));
 					else if(arg1 == 2)
-						cpu.r1.setRegisterContent(memory.readLong(arg2));
+						cpu.r1.setRegisterContent(mmu.readLong(arg2));
 					else if(arg1 == 3)
-						cpu.r2.setRegisterContent(memory.readLong(arg2));
+						cpu.r2.setRegisterContent(mmu.readLong(arg2));
 					else if(arg1 == 4)
-						cpu.r3.setRegisterContent(memory.readLong(arg2));
+						cpu.r3.setRegisterContent(mmu.readLong(arg2));
 				}
 				cpu.pc.nextInstruction(linesFromFile.size());
 				return;
@@ -860,7 +862,7 @@ public class Main {
 				String in = scanReg.nextLine();
 				try {
 					Long val = Long.parseLong(in);
-					memory.writeLong(adr, val);
+					mmu.writeLong(adr, val);
 				} catch(NumberFormatException e) {
 					System.out.println("shell: value can only be of value long");
 					errFlag = -1;
@@ -930,17 +932,17 @@ public class Main {
 		else if(argument.equals("pc"))
 			cpu.pc.infoDump();
 		else if(argument.replace("[", "").replace("]", "").equals("r0"))
-			System.out.println("Value on address 0x" + cpu.r0.getRegisterContent() + ": " + memory.readLong(cpu.r0.getRegisterContent()));
+			System.out.println("Value on address 0x" + cpu.r0.getRegisterContent() + ": " + mmu.readLong(cpu.r0.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r1"))
-			System.out.println("Value on address 0x" + cpu.r1.getRegisterContent() + ": " + memory.readLong(cpu.r1.getRegisterContent()));
+			System.out.println("Value on address 0x" + cpu.r1.getRegisterContent() + ": " + mmu.readLong(cpu.r1.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r2"))
-			System.out.println("Value on address 0x" + cpu.r2.getRegisterContent() + ": " + memory.readLong(cpu.r2.getRegisterContent()));
+			System.out.println("Value on address 0x" + cpu.r2.getRegisterContent() + ": " + mmu.readLong(cpu.r2.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r3"))
-			System.out.println("Value on address 0x" + cpu.r3.getRegisterContent() + ": " + memory.readLong(cpu.r3.getRegisterContent()));
+			System.out.println("Value on address 0x" + cpu.r3.getRegisterContent() + ": " + mmu.readLong(cpu.r3.getRegisterContent()));
 		else if(argument.substring(0,3).equals("[0x") && argument.charAt(argument.length()-1)==']') {
 			try {
-				long adr = Long.parseLong(argument.replace("[0x", "").replace("]", ""));
-				System.out.println("Value on address 0x" + adr + ": " + memory.readLong(adr));
+				long adr = Long.decode(argument.replace("[", "").replace("]", ""));
+				System.out.println("Value on address 0x" + adr + ": " + mmu.readLong(adr));
 				return;
 			} catch(NumberFormatException e) {
 				System.out.println("shell: Address not of long type");

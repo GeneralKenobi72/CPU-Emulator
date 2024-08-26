@@ -1,5 +1,7 @@
 package memory;
 
+import emulator.Main;
+
 public class MMU {
 	private Memory memory;
 	private PageTable pageTable;
@@ -10,7 +12,7 @@ public class MMU {
 		pageTable = pt;
 	}
 
-	public long translateVirtualToPhysical(int virtualAddress) throws Exception {
+	public long translateVirtualToPhysical(int virtualAddress) {
 		long virtualPageNumber = virtualAddress / Memory.PAGE_SIZE;
         long offset = virtualAddress % Memory.PAGE_SIZE;
 
@@ -23,9 +25,9 @@ public class MMU {
         return (physicalPageNumber * Memory.PAGE_SIZE) + offset;
 	}
 
-	private PageTableEntry handlePageFault(long virtualPageNumber) throws Exception {
-		if (nextFreePage * Memory.PAGE_SIZE >= Integer.MAX_VALUE) {
-            throw new Exception("Out of physical memory!");
+	private PageTableEntry handlePageFault(long virtualPageNumber) {
+		if (nextFreePage * Memory.PAGE_SIZE >= Long.MAX_VALUE) {
+			return null;
         }
 
         memory.allocatePage(nextFreePage);
@@ -36,17 +38,20 @@ public class MMU {
         return newEntry;
 	}
 
-	public byte readByte(int virtualAddress) throws Exception {
-		long physicalAddress = translateVirtualToPhysical(virtualAddress);
+	public byte readByte(long virtualAddress) {
+		long physicalAddress = translateVirtualToPhysical((int)virtualAddress);
         return memory.readByte(physicalAddress);
 	}
 
-	public void writeByte(int virtualAddress, byte value) throws Exception {
-		long physicalAddress = translateVirtualToPhysical(virtualAddress);
+	public void writeByte(long virtualAddress, byte value) {
+		if(Main.usedMemory > virtualAddress) {
+			System.out.println("shell: addresses 0x00 through [0x" + Long.toHexString(Main.usedMemory) + "] are used by user program and are not accessible"); 
+		}
+		long physicalAddress = translateVirtualToPhysical((int)virtualAddress);
         memory.writeByte(physicalAddress, value);
 	}
 
-	public long readLong(int virtualAddress) throws Exception {
+	public long readLong(long virtualAddress) {
         long result = 0;
         for (int i = 0; i < 8; i++) {
             result |= ((long) readByte(virtualAddress + i) & 0xFF) << (8 * i);
@@ -54,7 +59,7 @@ public class MMU {
         return result;
     }
 
-    public void writeLong(int virtualAddress, long value) throws Exception {
+    public void writeLong(long virtualAddress, long value) {
         for (int i = 0; i < 8; i++) {
             byte b = (byte) ((value >> (8 * i)) & 0xFF);
             writeByte(virtualAddress + i, b);
