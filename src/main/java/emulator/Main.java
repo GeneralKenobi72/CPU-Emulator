@@ -2,7 +2,6 @@ package emulator;
 
 import cpu.*;
 import memory.*;
-import java.math.BigInteger;
 import java.util.Scanner;
 import java.io.*;
 import java.util.*;
@@ -10,6 +9,8 @@ import java.util.*;
 public class Main {
 	public static CPU cpu = new CPU();
 	public static Memory memory = new Memory();
+	public static PageTable pageTable = new PageTable();
+	public static MMU mmu = new MMU(memory, pageTable);
 
 	public static boolean on = true;
 	public static boolean fileLoaded = false;

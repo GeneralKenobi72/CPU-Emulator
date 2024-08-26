@@ -4,41 +4,54 @@ public class Memory {
 	public static final long DATA_START_ADDRESS = 0x00000000L;
 	public static final long CODE_START_ADDRESS = 0x1F400000L;
 	public static final long MEMORY_SIZE = 0x20000000L;
+	public static final long PAGE_SIZE = 4096;
 
-	private byte[] memory;
+	private byte[] physicalMemory;
 
 	public Memory() {
-		memory = new byte[(int) MEMORY_SIZE];
+		physicalMemory = new byte[(int)PAGE_SIZE];
 	}
 
-	public byte readByte(long address) {
-		if(address < 0 || address >= memory.length) 
-			throw new ArrayIndexOutOfBoundsException("Address out of bounds");
-		return memory[(int)address];
+	public void writeByte(long physicalAddress, byte value) {
+        if (physicalAddress >= physicalMemory.length) {
+            throw new RuntimeException("Accessing unallocated memory: " + physicalAddress);
+        }
+        physicalMemory[(int)physicalAddress] = value;
+    }
+
+	public byte readByte(long physicalAddress) {
+		if (physicalAddress >= physicalMemory.length) {
+            throw new RuntimeException("Accessing unallocated memory: " + physicalAddress);
+        }
+        return physicalMemory[(int)physicalAddress];
 	}
 
-	public long readLong(long address) {
-		if(address < 0 || address+7 >= memory.length) 
-			throw new ArrayIndexOutOfBoundsException("Address out of bounds");
+	public void allocatePage(int physicalPageNumber) {
+        long requiredSize = (physicalPageNumber + 1) * PAGE_SIZE;
+        if (requiredSize > physicalMemory.length) {
+            expandMemory(requiredSize);
+        }
+    }
+
+	private void expandMemory(long newSize) {
+        byte[] newMemory = new byte[(int)newSize];
+        System.arraycopy(physicalMemory, 0, newMemory, 0, physicalMemory.length);
+        physicalMemory = newMemory;
+    }
+
+	public long readLong(long virtualAddress) {
 		long value = 0;
 		for(int i=0;i<8;i++) {
-			value |= (memory[(int) (address+i)] & 0xFFL) << (i*8);
+			byte b = readByte(virtualAddress + i);
+			value |= ((long)b & 0xFF) << (i*8);
 		}
 		return value;
 	}
 
-	public void writeByte(long address, byte value) {
-		if(address < 0 || address >= memory.length) 
-			throw new ArrayIndexOutOfBoundsException("Address out of bounds");
-		memory[(int)address] = value;
-	}
-
-	public void writeLong(long address, long value) {
-        if (address < 0 || address + 7 >= memory.length) {
-            throw new ArrayIndexOutOfBoundsException("Address out of bounds");
-        }
-        for (int i = 0; i < 8; i++) {
-            memory[(int) (address + i)] = (byte) (value >> (i * 8));
+	public void writeLong(long virtualAddress, long value) {
+		for (int i = 0; i < 8; i++) {
+            byte b = (byte) (value >>> (i * 8));
+            writeByte(virtualAddress + i, b);
         }
     }
 }
