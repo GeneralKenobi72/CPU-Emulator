@@ -1,9 +1,6 @@
 package memory;
 
 public class Memory {
-	public static final long DATA_START_ADDRESS = 0x00000000L;
-	public static final long CODE_START_ADDRESS = 0x1F400000L;
-	public static final long MEMORY_SIZE = 0x20000000L;
 	public static final long PAGE_SIZE = 4096;
 
 	private byte[] physicalMemory;

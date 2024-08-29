@@ -92,6 +92,7 @@ public class Main {
 	}
 
 	public static void loadFileToMemory(String fileName) {
+		usedMemory = 0;
 		if(fileLoaded == true) {
 			System.out.println("File already loaded, loading new file will overwrite current file and registers will be reset. Are you sure you want to continue?[y/n]");
 			Scanner scanYN = new Scanner(System.in);
@@ -346,10 +347,10 @@ public class Main {
 			address+=8;
 		}
 		mmu.writeByte(address, InstructionSet.EXIT_OPCODE);
-		cpu.pc.setRegisterContent(Memory.CODE_START_ADDRESS);
+		cpu.pc.setRegisterContent(0);
 		fileLoaded = true;
 		usedMemory = address;
-		address = Memory.CODE_START_ADDRESS;
+		address = 0;
 	}
 
 	public static void catFile() {
@@ -359,7 +360,7 @@ public class Main {
 			return;
 		}
 		for(int i=0;i<linesFromFile.size();i++) {
-			if(i == ((cpu.pc.getRegisterContent()-Memory.CODE_START_ADDRESS)/19))
+			if(i == ((cpu.pc.getRegisterContent())/19))
 				System.out.println(" ==> (" + (i+1) + ") " + linesFromFile.get(i));
 			else System.out.println("     (" +  (i+1) + ") " + linesFromFile.get(i));
 		}
@@ -381,33 +382,30 @@ public class Main {
 		}
 		int jumpWasSuccessful = 1;
 		if(jump.equals("jmp"))
-			jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+			jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 		else if(compareFlag !=-2) {
 			if(jump.equals("je")) {
 				if(compareFlag == 0)
-					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 			} else if(jump.equals("jne")) {
 				if(compareFlag != 0)
-					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 			} else if(jump.equals("jg")) {
 				if(compareFlag == 1)
-					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 			} else if(jump.equals("jl")) {
 				if(compareFlag == -1)
-					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 			} else if(jump.equals("jge")) {
 				if(compareFlag >= 0)
-					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 			} else if(jump.equals("jle")) {
 				if(compareFlag <= 0)
-					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19+Memory.CODE_START_ADDRESS, Memory.MEMORY_SIZE);
+					jumpWasSuccessful = cpu.pc.jumpToInstruction((lineNum-2)*19, Long.MAX_VALUE);
 			}
 		}
 		else {
 			System.out.println("shell: invalid use of jump function");
-			errFlag = 1;
-		}
-		if(jumpWasSuccessful == 1) {
 			errFlag = 1;
 		}
 	}
@@ -832,7 +830,7 @@ public class Main {
 		 	resetContext();
 		 	return;
 		}
-		cpu.pc.nextInstruction(Memory.MEMORY_SIZE);
+		cpu.pc.nextInstruction(linesFromFile.size());
 	}
 
 	public static void haltCPU() {
@@ -855,9 +853,10 @@ public class Main {
 	}
 
 	public static void inputValue(String argument) {
-		if(argument.substring(0, 3).equals("[0x") && argument.charAt(argument.length()-1) == ']') {
+		if(argument.length()>2 && argument.substring(0, 3).equals("[0x") && argument.charAt(argument.length()-1) == ']') {
 			try {
-				long adr = Long.parseLong(argument.replace("[0x", "").replace("]",""));
+				long adr = Long.decode(argument.replace("[", "").replace("]",""));
+				System.out.print("Input value for " + argument + ": ");
 				Scanner scanReg = new Scanner(System.in);
 				String in = scanReg.nextLine();
 				try {
@@ -887,6 +886,7 @@ public class Main {
 		}
 		GeneralPurposeRegister rI = new GeneralPurposeRegister();
 		Scanner scanReg = new Scanner(System.in);
+		System.out.print("Input value for " + argument + ": ");
 		String in = scanReg.nextLine();
 		try {
 			long possibleValue = Long.parseLong(in);
@@ -932,17 +932,17 @@ public class Main {
 		else if(argument.equals("pc"))
 			cpu.pc.infoDump();
 		else if(argument.replace("[", "").replace("]", "").equals("r0"))
-			System.out.println("Value on address 0x" + cpu.r0.getRegisterContent() + ": " + mmu.readLong(cpu.r0.getRegisterContent()));
+			System.out.println("Value on address " + cpu.r0.getRegisterContent() + ": " + mmu.readLong(cpu.r0.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r1"))
-			System.out.println("Value on address 0x" + cpu.r1.getRegisterContent() + ": " + mmu.readLong(cpu.r1.getRegisterContent()));
+			System.out.println("Value on address " + cpu.r1.getRegisterContent() + ": " + mmu.readLong(cpu.r1.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r2"))
-			System.out.println("Value on address 0x" + cpu.r2.getRegisterContent() + ": " + mmu.readLong(cpu.r2.getRegisterContent()));
+			System.out.println("Value on address " + cpu.r2.getRegisterContent() + ": " + mmu.readLong(cpu.r2.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r3"))
-			System.out.println("Value on address 0x" + cpu.r3.getRegisterContent() + ": " + mmu.readLong(cpu.r3.getRegisterContent()));
+			System.out.println("Value on address " + cpu.r3.getRegisterContent() + ": " + mmu.readLong(cpu.r3.getRegisterContent()));
 		else if(argument.substring(0,3).equals("[0x") && argument.charAt(argument.length()-1)==']') {
 			try {
-				long adr = Long.decode(argument.replace("[", "").replace("]", ""));
-				System.out.println("Value on address 0x" + adr + ": " + mmu.readLong(adr));
+				long adr = Long.parseLong(argument.replace("[0x", "").replace("]", ""));
+				System.out.println("Value on address " + adr + ": " + mmu.readLong(adr));
 				return;
 			} catch(NumberFormatException e) {
 				System.out.println("shell: Address not of long type");

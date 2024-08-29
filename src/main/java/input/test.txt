@@ -1,12 +1,11 @@
-mov r3, 9223372036854775807
-mov [0x04], 72
-mov r2, [r3]
-mov [0x10], 69
-mov r1, 'a'
-mov r2, 'l'
-add r0, 127
-not r1
+mov r0, 72
+mov r1, 28
+add r0, r1
+out r0
 out r1
-in [0x1000]
-mov r1, [0x10]
-mov [0x11], r2
+in r2
+out r2
+mov [0xff], r2
+out [0xff]
+cmp r2, 100
+jl 6
