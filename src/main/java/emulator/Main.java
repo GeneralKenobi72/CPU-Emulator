@@ -238,7 +238,6 @@ public class Main {
 					long adr;
 					try {
 						adr = Long.decode(strings[2].replace("[", "").replace("]",""));
-						System.out.println(adr);
 						arg2 = adr;
 					} catch(NumberFormatException e) {
 						System.out.println(s);
@@ -932,17 +931,17 @@ public class Main {
 		else if(argument.equals("pc"))
 			cpu.pc.infoDump();
 		else if(argument.replace("[", "").replace("]", "").equals("r0"))
-			System.out.println("Value on address " + cpu.r0.getRegisterContent() + ": " + mmu.readLong(cpu.r0.getRegisterContent()));
+			System.out.println(mmu.readLong(cpu.r0.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r1"))
-			System.out.println("Value on address " + cpu.r1.getRegisterContent() + ": " + mmu.readLong(cpu.r1.getRegisterContent()));
+			System.out.println(mmu.readLong(cpu.r1.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r2"))
-			System.out.println("Value on address " + cpu.r2.getRegisterContent() + ": " + mmu.readLong(cpu.r2.getRegisterContent()));
+			System.out.println(mmu.readLong(cpu.r2.getRegisterContent()));
 		else if(argument.replace("[", "").replace("[", "").equals("r3"))
-			System.out.println("Value on address " + cpu.r3.getRegisterContent() + ": " + mmu.readLong(cpu.r3.getRegisterContent()));
+			System.out.println(mmu.readLong(cpu.r3.getRegisterContent()));
 		else if(argument.substring(0,3).equals("[0x") && argument.charAt(argument.length()-1)==']') {
 			try {
 				long adr = Long.parseLong(argument.replace("[0x", "").replace("]", ""));
-				System.out.println("Value on address " + adr + ": " + mmu.readLong(adr));
+				System.out.println(mmu.readLong(adr));
 				return;
 			} catch(NumberFormatException e) {
 				System.out.println("shell: Address not of long type");

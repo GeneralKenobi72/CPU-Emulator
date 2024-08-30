@@ -17,14 +17,6 @@ public class GeneralPurposeRegister extends Register {
 		return dataType;
 	}
 
-	public final void infoDump() {
-		super.infoDump();
-		if(dataType == 0)
-			System.out.println("Data type: long");
-		else if(dataType == 1)
-			System.out.println("Data type: char");
-	}
-
 	public void setRegisterDataType(int dataType) {
 		this.dataType = dataType;
 	}

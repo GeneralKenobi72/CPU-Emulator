@@ -14,8 +14,7 @@ public abstract class Register {
 	public Register() { }
 
 	public void infoDump() {
-		System.out.println("Register name: " + this.getRegisterName());
-		System.out.println("Register content: " + this.getRegisterContent());
+		System.out.println(this.getRegisterContent());
 	}
 
 	public String getRegisterName() {

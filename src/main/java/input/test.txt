@@ -5,7 +5,9 @@ out r0
 out r1
 in r2
 out r2
-mov [0xff], r2
-out [0xff]
+mov [0x1ffff0], r2
+out [0x1ffff0]
+mov r3, [0x1ffff0]
+out r3
 cmp r2, 100
 jl 6
