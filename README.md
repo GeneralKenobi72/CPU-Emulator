@@ -50,4 +50,6 @@ You can write text file that utilizes commands described above and save it to sr
 ```
 fl file_name.txt
 ```
+Now you can step through each line of code using step(s) command, or just run entire program using run command.
+
 Using help command, you can see other useful commands.
