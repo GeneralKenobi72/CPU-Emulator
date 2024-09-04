@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GeneralPurposeRegisterTest {
 	@Test
-	public void	givenTwoPositiveRegisters_whenAddRegisters_retrunAdded() {
+	public void	givenTwoPositiveRegisters_whenAddRegisters_returnAdded() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -16,7 +16,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenPositiveAndNegativeRegisters_whenAddRegisters_retrunAdded() {
+	public void	givenPositiveAndNegativeRegisters_whenAddRegisters_returnAdded() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -27,7 +27,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoNegativeRegisters_whenAddRegisters_retrunAdded() {
+	public void	givenTwoNegativeRegisters_whenAddRegisters_returnAdded() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", -333);
 
@@ -38,7 +38,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoPositiveRegisters_whenSubtractRegisters_retrunSubtracted() {
+	public void	givenTwoPositiveRegisters_whenSubtractRegisters_returnSubtracted() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -49,7 +49,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenPositiveAndNegativeRegisters_whenSubtractRegisters_retrunSubtracted() {
+	public void	givenPositiveAndNegativeRegisters_whenSubtractRegisters_returnSubtracted() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -60,7 +60,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoNegativeRegisters_whenSubtractRegisters_retrunSubtracted() {
+	public void	givenTwoNegativeRegisters_whenSubtractRegisters_returnSubtracted() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", -333);
 
@@ -71,7 +71,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoPositiveRegisters_whenDivideRegisters_retrunDivided() {
+	public void	givenTwoPositiveRegisters_whenDivideRegisters_returnDivided() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -82,7 +82,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenPositiveAndNegativeRegisters_whenDivideRegisters_retrunDivided() {
+	public void	givenPositiveAndNegativeRegisters_whenDivideRegisters_returnDivided() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -93,7 +93,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoNegativeRegisters_whenDivideRegisters_retrunDivided() {
+	public void	givenTwoNegativeRegisters_whenDivideRegisters_returnDivided() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", -333);
 
@@ -104,7 +104,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoPositiveRegisters_whenMultiplyRegisters_retrunMultiplied() {
+	public void	givenTwoPositiveRegisters_whenMultiplyRegisters_returnMultiplied() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -115,7 +115,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenPositiveAndNegativeRegisters_whenMultiplyRegisters_retrunMultiplied() {
+	public void	givenPositiveAndNegativeRegisters_whenMultiplyRegisters_returnMultiplied() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -126,7 +126,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoNegativeRegisters_whenMultiplyRegisters_retrunMultiplied() {
+	public void	givenTwoNegativeRegisters_whenMultiplyRegisters_returnMultiplied() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", -222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", -333);
 
@@ -137,7 +137,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoRegisters_whenBitwiseANDRegisters_retrunAND() {
+	public void	givenTwoRegisters_whenBitwiseANDRegisters_returnAND() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -148,7 +148,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoRegisters_whenBitwiseORRegisters_retrunOR() {
+	public void	givenTwoRegisters_whenBitwiseORRegisters_returnOR() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -159,7 +159,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenTwoRegisters_whenXORRegisters_retrunXOR() {
+	public void	givenTwoRegisters_whenBitwiseXORRegisters_returnXOR() {
 		GeneralPurposeRegister R1 = new GeneralPurposeRegister("r1", 222);
 		GeneralPurposeRegister R2 = new GeneralPurposeRegister("r2", 333);
 
@@ -170,7 +170,7 @@ public class GeneralPurposeRegisterTest {
 	}
 
 	@Test
-	public void	givenOneRegister_whenNOTRegister_retrunNOT() {
+	public void	givenOneRegister_whenBitwiseNOTRegister_returnNOT() {
 		GeneralPurposeRegister R = new GeneralPurposeRegister("r1", 222);
 
 		long excpectedValue = ~222;

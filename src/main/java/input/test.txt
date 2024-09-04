@@ -9,5 +9,9 @@ mov [0x1ffff0], r2
 out [0x1ffff0]
 mov r3, [0x1ffff0]
 out r3
+mov [0xffff], 444
+mov r0, 65535
+mov [0xff00], [r0]
+out [0xff00]
 cmp r2, 100
 jl 6
